@@ -1,0 +1,36 @@
+.footer {
+  position: relative;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: black;
+  color: white;
+  text-align: center;
+  min-height: 30vh;
+  margin-top: 60vh;
+  /* This will push the footer down by half the height of the viewport */
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+.links {
+  display: flex;
+  justify-content: space-between;
+  max-width: 800px;
+  margin: auto;
+  color: white;
+}
+
+.links a {
+  float: left;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 25px;
+  border-radius: 4px;
+}
