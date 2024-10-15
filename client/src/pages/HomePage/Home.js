@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Home.css';
 import TextField from '@mui/material/TextField';
@@ -11,22 +11,15 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import Button from '@mui/material/Button';
 
 function Home() {
-  const [value, setValue] = React.useState('');
   const [submissionAttempted, setSubmissionAttempted] = React.useState(false);
   const [selectedPickupLocation, setSelectedPickupLocation] = React.useState('');
+  const [selectedDropoffLocation, setSelectedDropoffLocation] = React.useState('');
   const [selectedPickupDate, setSelectedPickupDate] = React.useState('');
   const [selectedDropOffDate, setSelectedDropOffDate] = React.useState('');
   const [selectedPickupTime, setSelectedPickupTime] = React.useState('');
   const [selectedDropOffTime, setSelectedDropOffTime] = React.useState('');
 
-  const handleChange = (event) => {
-    setValue(event.target.value);
-  };
-
   const pickupDateValid = () => {
-    if (submissionAttempted == false) {
-      return true;
-    }
     if (dateValid() == true && selectedPickupDate != '') {
       return true;
     }
@@ -35,9 +28,6 @@ function Home() {
   }
 
   const dropoffDateValid = () => {
-    if (submissionAttempted == false) {
-      return true;
-    }
     if (dateValid() == true && selectedDropOffDate != '') {
       return true;
     }
@@ -54,10 +44,6 @@ function Home() {
   }
 
   const pickupTimeValid = () => {
-    if (submissionAttempted == false) {
-      return true;
-    }
-
     if (timeValid() == true) {
       return true;
     }
@@ -66,10 +52,6 @@ function Home() {
   };
 
   const dropoffTimeValid = () => {
-    if (submissionAttempted == false) {
-      return true;
-    }
-
     if (timeValid() == true) {
       return true;
     }
@@ -86,10 +68,14 @@ function Home() {
   }
 
   const pickupLocationValid = () => {
-    if (submissionAttempted == false) {
+    if (selectedPickupLocation != '') {
       return true;
     }
 
+    return false;
+  }
+
+  const dropoffLocationValid = () => {
     if (selectedPickupLocation != '') {
       return true;
     }
@@ -100,6 +86,7 @@ function Home() {
   const SubmitReservationRequest = () => {
     setSubmissionAttempted(true);
 
+    console.log(submissionAttempted);
     console.log(pickupDateValid());
     console.log(dropoffDateValid());
     console.log(pickupTimeValid());
@@ -108,7 +95,7 @@ function Home() {
 
     if (pickupDateValid() == true && dropoffDateValid() == true
       && pickupTimeValid() == true && dropoffTimeValid() == true
-      && pickupLocationValid() == true) {
+      && pickupLocationValid() == true && dropoffLocationValid() == true) {
       window.open('/view_cars');
     }
   }
@@ -126,8 +113,13 @@ function Home() {
             onChange={(event) => setSelectedPickupLocation(event.target.value)}
             variant="outlined"
             fullWidth
-            error={!pickupLocationValid()}
-            helperText={!pickupLocationValid() ? "Invalid Pickup Location" : ""}
+            error={!pickupLocationValid() && submissionAttempted}
+            helperText=
+            {
+              !pickupLocationValid() && submissionAttempted
+                ? "Invalid Pickup Location"
+                : ""
+            }
           >
             <MenuItem value="28306">Hope Mills, NC, 28306</MenuItem>
             <MenuItem value="28301">Fayetteville, NC, 28301</MenuItem>
@@ -141,8 +133,11 @@ function Home() {
                   onChange={(date) => setSelectedPickupDate(date)}
                   slotProps={{
                     textField: {
-                      error: !pickupDateValid(),
-                      helperText: !pickupDateValid() ? "Invalid Date" : "",
+                      error: !pickupDateValid() && submissionAttempted,
+                      helperText: !pickupDateValid() && submissionAttempted
+                        ?
+                        "Invalid Date"
+                        : "",
                     },
                   }}
                 />
@@ -156,8 +151,10 @@ function Home() {
                   onChange={(date) => setSelectedDropOffDate(date)}
                   slotProps={{
                     textField: {
-                      error: !dropoffDateValid(),
-                      helperText: !dropoffDateValid() ? "Invalid Date" : "",
+                      error: !dropoffDateValid() && submissionAttempted,
+                      helperText: !dropoffDateValid() && submissionAttempted
+                        ? "Invalid Date"
+                        : "",
                     },
                   }}
                 />
@@ -174,8 +171,10 @@ function Home() {
                   fullWidth
                   slotProps={{
                     textField: {
-                      error: !pickupTimeValid(),
-                      helperText: !pickupTimeValid() ? "Invalid Time" : "",
+                      error: !pickupTimeValid() && submissionAttempted,
+                      helperText: !pickupTimeValid() && submissionAttempted
+                        ? "Invalid Time"
+                        : "",
                     },
                   }}
                 />
@@ -190,17 +189,34 @@ function Home() {
                   fullWidth
                   slotProps={{
                     textField: {
-                      error: !dropoffTimeValid(),
-                      helperText: !dropoffTimeValid() ? "Invalid Time" : "",
+                      error: !dropoffTimeValid() && submissionAttempted,
+                      helperText: !dropoffTimeValid() && submissionAttempted
+                        ? "Invalid Time"
+                        : "",
                     },
                   }}
                 />
               </LocalizationProvider>
             </Grid>
           </Grid>
+          <TextField
+            select
+            label="Select Dropoff-Location"
+            value={selectedDropoffLocation}
+            onChange={(event) => setSelectedDropoffLocation(event.target.value)}
+            variant="outlined"
+            fullWidth
+            error={!dropoffLocationValid() && submissionAttempted}
+            helperText={!dropoffLocationValid() && submissionAttempted
+              ? "Invalid Pickup Location"
+              : ""}
+          >
+            <MenuItem value="28306">Hope Mills, NC, 28306</MenuItem>
+            <MenuItem value="28301">Fayetteville, NC, 28301</MenuItem>
+          </TextField>
           <br />
           <Button
-            onClick={SubmitReservationRequest}
+            onClick={() => { setSubmissionAttempted(true); SubmitReservationRequest(); }}
             variant="contained"
             style={{ backgroundColor: 'black', color: 'white' }}
             fullWidth
