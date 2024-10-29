@@ -1,3 +1,9 @@
+import sys
+
+sys.path.append("..")
+sys.path.append(".")
+
+
 # run.py
 from app.myapp import create_app
 

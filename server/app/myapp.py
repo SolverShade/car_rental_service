@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from .extensions import db, migrate, bcrypt
+from routes.reservation_routes import reservation_bp
 
 
 def create_app(test_config=None):
@@ -19,11 +20,7 @@ def create_app(test_config=None):
     migrate.init_app(app, db)
     bcrypt.init_app(app)
 
-    @app.route("/", methods=["GET"])
-    def hello_world():
-        return jsonify(message="Hello, World!")
-
-    # TODO: Register blueprints
+    app.register_blueprint(reservation_bp)
 
     # Create tables
     with app.app_context():
