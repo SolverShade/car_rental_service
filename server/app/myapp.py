@@ -1,3 +1,8 @@
+import sys
+
+sys.path.append("..")
+sys.path.append(".")
+
 from flask import Flask, jsonify
 from .extensions import db, migrate, bcrypt
 from routes.reservation_routes import reservation_bp
@@ -19,6 +24,10 @@ def create_app(test_config=None):
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
+
+    @app.route("/")
+    def hello_world():
+        return jsonify(message="Hello, World!")
 
     app.register_blueprint(reservation_bp)
 

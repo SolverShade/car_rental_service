@@ -12,7 +12,6 @@ def get_reservations():
         # Query the database for all reservations
         reservations = Reservation.query.all()
 
-        # Serialize the reservation objects to JSON
         reservations_list = [
             {
                 "id": reservation.id,
@@ -26,7 +25,6 @@ def get_reservations():
             for reservation in reservations
         ]
 
-        # Return the serialized reservations in the response
         return jsonify(reservations_list), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -66,6 +64,13 @@ def create_reservation():
     except ValueError as e:
         return jsonify({"error": f"Invalid date or time format: {str(e)}"}), 400
 
+    # Check if start time is before end time
+    if start_time >= end_time:
+        return jsonify({"error": "Start time must be before end time"}), 400
+
+    if start_date >= end_date:
+        return jsonify({"error": "Start date must be before end End date"}), 400
+
     # Create a new Reservation object
     new_reservation = Reservation(
         start_date=start_date,
@@ -77,9 +82,7 @@ def create_reservation():
     )
 
     try:
-        # Add the new reservation to the database session
         db.session.add(new_reservation)
-        # Commit the session to save the reservation to the database
         db.session.commit()
         return jsonify({"message": "Reservation created successfully"}), 201
     except Exception as e:
