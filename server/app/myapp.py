@@ -1,13 +1,21 @@
+import sys
+
+sys.path.append("..")
+sys.path.append(".")
+
 from flask import Flask, jsonify
+from flask_cors import CORS
 from .extensions import db, migrate, bcrypt
+from routes.reservation_routes import reservation_bp
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
     # Default config
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///sample.db"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
     app.config["SECRET_KEY"] = "tomato"
 
     # Override config for testing if provided
@@ -19,11 +27,11 @@ def create_app(test_config=None):
     migrate.init_app(app, db)
     bcrypt.init_app(app)
 
-    @app.route("/", methods=["GET"])
+    @app.route("/")
     def hello_world():
         return jsonify(message="Hello, World!")
 
-    # TODO: Register blueprints
+    app.register_blueprint(reservation_bp)
 
     # Create tables
     with app.app_context():
