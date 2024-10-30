@@ -155,8 +155,8 @@ function Home() {
                 : ""
             }
           >
-            <MenuItem value="28306">Hope Mills, NC, 28306</MenuItem>
-            <MenuItem value="28301">Fayetteville, NC, 28301</MenuItem>
+            <MenuItem value="Hope Mills, NC, 28306">Hope Mills, NC, 28306</MenuItem>
+            <MenuItem value="Fayetteville, NC, 28301">Fayetteville, NC, 28301</MenuItem>
           </TextField>
           <Grid container spacing={3}>
             <Grid item xs={6}>
@@ -245,8 +245,8 @@ function Home() {
               ? "Invalid Pickup Location"
               : ""}
           >
-            <MenuItem value="28306">Hope Mills, NC, 28306</MenuItem>
-            <MenuItem value="28301">Fayetteville, NC, 28301</MenuItem>
+            <MenuItem value="Hope Mills, NC, 28306">Hope Mills, NC, 28306</MenuItem>
+            <MenuItem value="Fayetteville, NC, 28301">Fayetteville, NC, 28301</MenuItem>
           </TextField>
           <br />
           <Button

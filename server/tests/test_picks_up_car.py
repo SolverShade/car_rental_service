@@ -58,6 +58,3 @@ def test_create_reservation_invalid_date_format():
     with app.test_client() as client:
         response = client.post("/create_reservation", json=sample_data)
         assert response.status_code == 400
-
-
-# TODO: Add tests for paying and confirming bill
