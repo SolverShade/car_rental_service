@@ -8,6 +8,15 @@ Vehicle Rental Service
 
 ### Prerequisites
 
+
+### Clone the Repository
+
+First, clone the repository to your local machine:
+
+```bash
+https://github.com/SolverShade/car_rental_service
+```
+
 - Node.js and npm: You can download Node.js and npm from [here](https://nodejs.org/en/download/). After installing, you can check the version by running the following commands in your terminal:
 
 ```bash
@@ -21,19 +30,6 @@ npm -v
 python --version
 ```
 
-- Once Python is installed, you can install the pip packages with
-
-```bash
-pip install -r requirements.txt
-```
-
-### Clone the Repository
-
-First, clone the repository to your local machine:
-
-```bash
-https://github.com/SolverShade/car_rental_service
-```
 
 ## Building and Running the App
 
@@ -67,25 +63,38 @@ Open a new terminal and navigate to the Flask app directory:
 cd server
 ```
 
-Set the flask app environment variable:
-
-- On Windows:
+- Create a python virtual enviorment in /server
 
 ```bash
-set FLASK_APP=run.py
+python -m venv venv
 ```
 
-- On Unix or MacOS:
+- source the environment
 
 ```bash
-export FLASK_APP=run.py
+source venv/bin/activate
 ```
 
-Run the Flask app:
+- install all the libraries on your environment
 
 ```bash
-flask run
+pip install -r requirements.txt
+```
+
+Run the python application
+
+```bash
+python run.py
 ```
 
 The Flask app will start running on [http://localhost:5000](http://localhost:5000).
+
+### installing libraries on backend
+
+When you want to install python libraries in our backend you can do the following
+as long as your virtual enviorment is activated
+
+```bash
+pip freeze > requirements.txt
+```
 
