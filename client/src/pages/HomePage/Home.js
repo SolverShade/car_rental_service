@@ -9,6 +9,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import Button from '@mui/material/Button';
+import dayjs from 'dayjs';
+import axios from 'axios';
 
 function Home() {
   const [submissionAttempted, setSubmissionAttempted] = React.useState(false);
@@ -83,20 +85,52 @@ function Home() {
     return false;
   }
 
-  const SubmitReservationRequest = () => {
+  const SubmitReservationRequest = async () => {
     setSubmissionAttempted(true);
-
-    console.log(submissionAttempted);
-    console.log(pickupDateValid());
-    console.log(dropoffDateValid());
-    console.log(pickupTimeValid());
-    console.log(dropoffTimeValid());
-    console.log(pickupLocationValid());
 
     if (pickupDateValid() == true && dropoffDateValid() == true
       && pickupTimeValid() == true && dropoffTimeValid() == true
       && pickupLocationValid() == true && dropoffLocationValid() == true) {
-      window.open('/view_cars');
+
+      const formattedPickupTime = dayjs(selectedPickupTime).format('HH:mm:ss');
+      const formattedDropoffTime = dayjs(selectedDropOffTime).format('HH:mm:ss');
+      const formattedPickupDate = dayjs(selectedPickupDate).format('MM/DD/YY');
+      const formattedDropoffDate = dayjs(selectedDropOffDate).format('MM/DD/YY');
+
+      console.log(selectedPickupLocation);
+      console.log(selectedDropoffLocation);
+      console.log(formattedPickupDate);
+      console.log(formattedDropoffDate);
+      console.log(formattedPickupTime);
+      console.log(formattedDropoffTime);
+
+      // note that this creates the inital reservation
+      // customer and car are added later
+      const reservation_body = {
+        pickup_location: selectedPickupLocation.toString(),
+        dropoff_location: selectedDropoffLocation.toString(),
+        start_date: formattedPickupDate,
+        end_date: formattedDropoffDate,
+        start_time: formattedPickupTime,
+        end_time: formattedDropoffTime
+      };
+
+      await axios.post('http://localhost:5000/create_reservation', reservation_body)
+        .then(response => {
+          console.log('Reservation created:', response.data);
+        })
+        .catch(error => {
+          if (error.response && error.response.data) {
+            console.error('There was an error creating the reservation!', error.response.data.error);
+            if (error.response.data.missing_fields) {
+              console.error('Missing fields:', error.response.data.missing_fields.join(', '));
+            }
+          } else {
+            console.error('There was an error creating the reservation!', error);
+          }
+        });
+
+      window.location.href = "/view_cars";
     }
   }
 

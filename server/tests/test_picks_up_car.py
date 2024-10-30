@@ -17,8 +17,8 @@ def test_start():
 
 def test_create_reservation():
     sample_data = {
-        "start_date": "2023-10-01",
-        "end_date": "2023-10-10",
+        "start_date": "10/04/24",
+        "end_date": "10/05/24",
         "start_time": "10:00:00",
         "end_time": "18:00:00",
         "pickup_location": "Location A",
@@ -33,8 +33,8 @@ def test_create_reservation():
 
 def test_create_reservation_missing_fields():
     sample_data = {
-        "start_date": "2023-10-01",
-        "end_date": "2023-10-10",
+        "start_date": "10/04/24",
+        "end_date": "10/05/24",
         "start_time": "10:00:00",
         "end_time": "18:00:00",
         "pickup_location": "Location A",
@@ -48,8 +48,8 @@ def test_create_reservation_missing_fields():
 
 def test_create_reservation_invalid_date_format():
     sample_data = {
-        "start_date": "2023-12-01",
-        "end_date": "2023-11-10",
+        "start_date": "10/05/2024",
+        "end_date": "10/03/2024",
         "start_time": "10:00:00",
         "end_time": "18:00:00",
         "pickup_location": "Location A",

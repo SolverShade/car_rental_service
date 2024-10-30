@@ -57,8 +57,8 @@ def create_reservation():
 
     try:
         # Convert date and time strings to datetime objects
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        start_date = datetime.strptime(start_date_str, "%m/%d/%y").date()
+        end_date = datetime.strptime(end_date_str, "%m/%d/%y").date()
         start_time = datetime.strptime(start_time_str, "%H:%M:%S").time()
         end_time = datetime.strptime(end_time_str, "%H:%M:%S").time()
     except ValueError as e:
