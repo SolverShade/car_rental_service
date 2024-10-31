@@ -117,7 +117,11 @@ function Home() {
 
       await axios.post('http://localhost:5000/create_reservation', reservation_body)
         .then(response => {
+          let reservationId = response.data.reservation_id;
+          sessionStorage.setItem('reservationId', reservationId);
+
           console.log('Reservation created:', response.data);
+          console.log('Reservation id:', reservationId);
         })
         .catch(error => {
           if (error.response && error.response.data) {

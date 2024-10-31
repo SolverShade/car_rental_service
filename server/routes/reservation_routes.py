@@ -84,7 +84,31 @@ def create_reservation():
     try:
         db.session.add(new_reservation)
         db.session.commit()
-        return jsonify({"message": "Reservation created successfully"}), 201
+        return jsonify(
+            {
+                "message": "Reservation created successfully",
+                "reservation_id": new_reservation.id,
+            }
+        ), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
+
+@reservation_bp.route("/reservation/<int:reservation_id>", methods=["GET"])
+def get_reservation(reservation_id):
+    reservation = Reservation.query.get(reservation_id)
+    if reservation is None:
+        return jsonify({"error": "Reservation not found"}), 404
+
+    reservation_data = {
+        "id": reservation.id,
+        "start_date": reservation.start_date.strftime("%m/%d/%y"),
+        "end_date": reservation.end_date.strftime("%m/%d/%y"),
+        "start_time": reservation.start_time.strftime("%H:%M:%S"),
+        "end_time": reservation.end_time.strftime("%H:%M:%S"),
+        "pickup_location": reservation.pickup_location,
+        "dropoff_location": reservation.dropoff_location,
+    }
+
+    return jsonify(reservation_data), 200
