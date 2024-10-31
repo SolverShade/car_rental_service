@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-
 from app.extensions import db
 
 
@@ -13,6 +12,9 @@ class Reservation(db.Model):
     end_time = db.Column(db.Time, nullable=False)
     pickup_location = db.Column(db.String(255), nullable=False)
     dropoff_location = db.Column(db.String(255), nullable=False)
+    customer_id = db.Column(db.Integer, nullable=True)
+    car_id = db.Column(db.Integer, nullable=True)
+    bill_id = db.Column(db.Integer, nullable=True)
 
     def __init__(
         self,
@@ -22,6 +24,9 @@ class Reservation(db.Model):
         end_time,
         pickup_location,
         dropoff_location,
+        customer_id=None,
+        bill_id=None,
+        car_id=None,
     ):
         self.start_date = start_date
         self.end_date = end_date
@@ -29,3 +34,6 @@ class Reservation(db.Model):
         self.end_time = end_time
         self.pickup_location = pickup_location
         self.dropoff_location = dropoff_location
+        self.customer_id = customer_id
+        self.car_id = car_id
+        self.bill_id = bill_id
