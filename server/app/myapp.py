@@ -7,6 +7,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from .extensions import db, migrate, bcrypt
 from routes.reservation_routes import reservation_bp
+from routes.staff_routes import staff_bp
 
 
 def create_app(test_config=None):
@@ -32,6 +33,7 @@ def create_app(test_config=None):
         return jsonify(message="Hello, World!")
 
     app.register_blueprint(reservation_bp)
+    app.register_blueprint(staff_bp)
 
     # Create tables
     with app.app_context():
