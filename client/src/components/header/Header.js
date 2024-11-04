@@ -4,22 +4,34 @@ import {
   Button, Dialog, DialogActions,
   DialogContent, DialogContentText,
   DialogTitle, Box, Typography, InputLabel,
-  MenuItem, Select
+  MenuItem, Select, Grid
 } from '@mui/material';
 import TextField from '@mui/material/TextField';
+import GavelIcon from '@mui/icons-material/Gavel';
 
 function Header() {
   const [openLogin, setLoginOpen] = useState(false);
   const [openSignup, setSignupOpen] = useState(false);
-  const [email, setEmail] = useState(false);
-  const [password, setPassword] = useState(false);
-  const [firstName, setFirstName] = useState(false);
-  const [lastName, setLastName] = useState(false);
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [loginAttempted, setLoginAttempted] = useState(false);
+  const [signupAttempted, setSignupAttempted] = useState(false);
 
-  const handleLinkClick = (event) => {
+  const handleLoginLink = (event) => {
     const loggedIn = sessionStorage.getItem('loggedIn');
     if (!loggedIn) {
       setLoginOpen(true);
+      event.preventDefault();
+    }
+  };
+
+  const handleSignupLink = (event) => {
+    const loggedIn = sessionStorage.getItem('loggedIn');
+    if (!loggedIn) {
+      setSignupOpen(true);
       event.preventDefault();
     }
   };
@@ -36,7 +48,7 @@ function Header() {
     //TODO: check for account in database
   }
 
-  function isValidEmail(email) {
+  function isValidEmail() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
@@ -45,19 +57,21 @@ function Header() {
     //TODO: check for username in database
   }
 
-  function isValidPassword(password) {
+  function isValidPassword() {
     return password.length >= 8;
   }
 
   async function handleSignup() {
     //TODO: Implement signup and create user
-    handleLoginClose();
+    setSignupAttempted(true);
   }
 
 
   async function handleLogin() {
     //TODO: Implement login and get token
-    handleLoginClose();
+
+    setLoginAttempted(true);
+    //handleLoginClose();
   }
 
   return (
@@ -67,62 +81,133 @@ function Header() {
         <a href="/" class="logo">Car Rental Service</a>
         <div class="header-right">
           <a class="/" href="/">HOME</a>
-          <a className="/staff_portal" href="/" onClick={handleLinkClick}>STAFF/ADMIN PORTAL</a>
+          <a className="/staff_portal" href="/" onClick={handleLoginLink}>STAFF/ADMIN PORTAL</a>
           <Dialog open={openLogin} onClose={handleLoginClose}>
-            <DialogTitle>{"Login"}</DialogTitle>
+            <DialogTitle>
+              {"Staff/Admin Login"}
+              <GavelIcon style={{ marginLeft: "16px" }} />
+              <Button
+                style={{ marginLeft: "248px" }}
+                variant="contained"
+                className="top-right-button"
+                onClick={handleLoginClose}
+                color="error"
+              >
+                Close
+              </Button>
+            </DialogTitle>
             <DialogContent>
               <br />
-              <Box display="flex" flexDirection="column" gap={2} mt={2}>
+              <Box display="flex" flexDirection="column" gap={3} mt={0}>
                 <TextField
-                  label="Email"
+                  label="Username"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  error={!isValidEmail(email)}
-                  helperText=
-                  {
-                    !isValidEmail(email)
-                      ? "Invalid Email"
+                  onChange={(event) => setUsername(event.target.value)}
+                  slotProps={{
+                    error: !isValidUsername() && loginAttempted,
+                    helperText: !isValidUsername() && loginAttempted
+                      ? "Invalid Username"
                       : ""
-                  }
+                  }}
                 />
                 <TextField
                   label="Password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  error={!isValidPassword(password)}
-                  helperText=
-                  {
-                    !isValidPassword(password)
-                      ? "Invalid Password"
-                      : ""
-                  }
+                  slotProps={{
+                    error: !isValidPassword() && loginAttempted,
+                    helperText: !isValidPassword() && loginAttempted
+                      ?
+                      "Invalid Password"
+                      : "",
+                  }}
                 />
+                <Button
+                  onClick={handleLogin}
+                  variant="contained"
+                  color="primary"
+                >
+                  Submit
+                </Button>
+                <br />
                 <Typography variant="body2" color="textSecondary" align="center">
-                  Don't have an account? Follow this link to
+                  Don't have an account? Follow this link to create your
+                  staff or admin account
                   <Button onClick={() => {
                     setSignupOpen(true);
                     handleLoginClose();
                   }
                   }>
                     Sign up
-                  </Button>.
+                  </Button>
                 </Typography>
-                <Button onClick={handleLogin} color="primary">
-                  Submit
-                </Button>
               </Box>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={handleLoginClose} color="primary">
+          </Dialog>
+          <Dialog
+            open={openSignup}
+            onClose={handleLoginClose}
+            PaperProps={{
+              style: {
+                minWidth: '600px', // Set the minimum width here
+              },
+            }}
+          >
+            <DialogTitle>{"Staff/Admin Sign Up"}
+              <GavelIcon style={{ marginLeft: "16px" }} />
+              <Button
+                style={{ marginLeft: "248px", maxWidth: '120px' }}
+                variant="contained"
+                className="top-right-button"
+                onClick={handleSignupClose}
+                color="error"
+              >
                 Close
               </Button>
-            </DialogActions>
-          </Dialog>
-          <Dialog open={openSignup} onClose={handleLoginClose}>
-            <DialogTitle>{"Sign Up"}</DialogTitle>
+            </DialogTitle>
             <DialogContent>
               <br />
-              <Box display="flex" flexDirection="column" gap={2} mt={2} minWidth={500}>
+              <Box display="flex" flexDirection="column" gap={3} mt={0}>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="First Name"
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Last Name"
+                      fullWidth
+                    />
+                  </Grid>
+                </Grid>
+                <TextField
+                  label="Email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  slotProps={{
+                    error: !isValidEmail() && signupAttempted,
+                    helperText: !isValidEmail() && signupAttempted
+                      ?
+                      "Invalid Email"
+                      : "",
+                  }}
+                />
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Username"
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Password"
+                      fullWidth
+                    />
+                  </Grid>
+                </Grid>
                 <TextField
                   select
                   label="User Type"
@@ -134,43 +219,18 @@ function Header() {
                   <MenuItem value={0}>Staff</MenuItem>
                   <MenuItem value={1}>Admin</MenuItem>
                 </TextField>
-                <TextField
-                  label="Email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  error={!isValidEmail(email)}
-                  helperText=
-                  {
-                    !isValidEmail(email)
-                      ? "Invalid Email"
-                      : ""
-                  }
-                />
-                <TextField
-                  label="Username"
-                />
-                <TextField
-                  label="Password"
-                />
-                <TextField
-                  label="First Name"
-                />
-                <TextField
-                  label="Last Name"
-                />
-                <Button onClick={handleLogin} color="primary">
+                <Button
+                  onClick={handleSignup}
+                  variant="contained"
+                  color="primary"
+                >
                   Submit
                 </Button>
               </Box>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={handleSignupClose} color="primary">
-                Close
-              </Button>
-            </DialogActions>
           </Dialog>
-          <a href="/signup">SIGN UP</a>
-          <a href="/login">LOG IN</a>
+          <a className="/signup" href="/" onClick={handleSignupLink}>SIGN UP</a>
+          <a className="/login" href="/" onClick={handleLoginLink}>LOGIN</a>
         </div>
       </div>
     </header >
