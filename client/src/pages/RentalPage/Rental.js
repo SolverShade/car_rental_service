@@ -1,39 +1,57 @@
-import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Rental.css';
 import Button from '@mui/material/Button';
+import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { formatTime } from '../../utility/DateUtils'
 
 function ReservationForm() {
-  return(
+  return (
     <form className="form-container">
       <label><b>Fist Name</b></label><br />
-      <input type="text" className="form-field"/><br />
+      <input type="text" className="form-field" /><br />
       <label><b>Last Name</b></label><br />
-      <input type="text" className="form-field"/><br />
+      <input type="text" className="form-field" /><br />
       <label><b>Email</b></label><br />
-      <input type="text" className="form-field"/><br />
+      <input type="text" className="form-field" /><br />
       <label><b>Phone Number</b></label><br />
-      <input type="text" className="form-field"/><br />
+      <input type="text" className="form-field" /><br />
     </form>
   )
 }
 
 function PaymentForm() {
-  return(
+  return (
     <form className="form-container">
       <label><b>Name on Card</b></label><br />
-      <input type="text" className="form-field"/><br />
+      <input type="text" className="form-field" /><br />
       <label><b>Card Number</b></label><br />
-      <input type="text" className="form-field"/><br />
+      <input type="text" className="form-field" /><br />
       <label><b>Expiration Date</b></label><br />
-      <input type="text" className="form-field"/><br />
+      <input type="text" className="form-field" /><br />
       <label><b>CVC</b></label><br />
-      <input type="text" className="form-field"/><br />
+      <input type="text" className="form-field" /><br />
     </form>
   )
 }
 
 function Rental() {
+  const [reservation, setReservation] = useState(null);
+
+  useEffect(() => {
+    const fetchReservation = async () => {
+      const reservationId = sessionStorage.getItem('reservationId');
+      const response = await axios.get(`http://localhost:5000/reservation/${reservationId}`);
+      setReservation(response.data);
+    };
+
+    fetchReservation();
+  }, []);
+
+  if (!reservation) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="reservation-container">
       <h2>Review & Reserve</h2>
@@ -43,21 +61,21 @@ function Rental() {
           <div className="reservation-details-container container-style">
             <h4>Reservation Details</h4>
             <p>
-            <b>Pick-up</b><br />
-            Hope Mills, NC 28306 <br />
-            October 20, 2024  <br />
-            1:00 pm  <br />
+              <b>Pick-up</b><br />
+              {reservation.pickup_location} <br />
+              {reservation.start_date}  <br />
+              {formatTime(reservation.start_time)}  <br />
             </p>
             <p>
-            <b>Drop-off</b><br />
-            Hope Mills, NC 28306  <br />
-            October 26, 2024  <br />
-            1:00 pm  <br />
+              <b>Drop-off</b><br />
+              {reservation.dropoff_location} <br />
+              {reservation.end_date}  <br />
+              {formatTime(reservation.end_time)}  <br />
             </p>
             <Button
-            variant="contained"
-            style={{ backgroundColor: 'black', color: 'white' }}
-            fullWidth
+              variant="contained"
+              style={{ backgroundColor: 'black', color: 'white' }}
+              fullWidth
             >
               Change Reservation
             </Button>
@@ -89,19 +107,19 @@ function Rental() {
             <h4>Select Payment Method</h4>
             <div className="payment-choice">
               <div className="radio-button-container">
-                <input type="radio" id="credit" name="payment-type" value="Credit Card"/><br />
+                <input type="radio" id="credit" name="payment-type" value="Credit Card" /><br />
                 <label for="credit">Credit Card</label>
               </div>
               <div className="radio-button-container">
-                <input type="radio" id="In-person" name="payment-type" value="In-person"/><br />
+                <input type="radio" id="In-person" name="payment-type" value="In-person" /><br />
                 <label for="In-person">In-person</label>
               </div>
             </div>
             <PaymentForm></PaymentForm>
             <Button
-            variant="contained"
-            style={{ backgroundColor: 'black', color: 'white' }}
-            fullWidth
+              variant="contained"
+              style={{ backgroundColor: 'black', color: 'white' }}
+              fullWidth
             >
               Reserve
             </Button>
