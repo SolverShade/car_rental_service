@@ -28,12 +28,11 @@ function Header() {
 
   useEffect(() => {
     const userFound = sessionStorage.getItem('userFound') === 'true';
-    const firstName = sessionStorage.getItem('firstName') || '';
-    const lastName = sessionStorage.getItem('lastName') || '';
 
-
-    setFirstName(sessionStorage.getItem('firstName') || '');
-    setLastName(sessionStorage.getItem('lastName') || '');
+    if (firstName === '' || lastName === '') {
+      setFirstName(sessionStorage.getItem('firstName') || '');
+      setLastName(sessionStorage.getItem('lastName') || '');
+    }
 
     setUserFound(userFound);
     setFirstName(firstName);
@@ -80,7 +79,8 @@ function Header() {
   }
 
   function isValidUsername() {
-    return username.length >= 8;
+    const regex = /^[A-Za-z]+$/;
+    return username.length >= 8 && regex.test(username);
   }
 
   function isValidPassword() {
@@ -124,7 +124,8 @@ function Header() {
         setSignupOpen(false);
       })
       .catch(error => {
-        NotificationManager.error('Error', 'Signup unsuccessful', 1250);
+        NotificationManager.error('Error',
+          'Signup unsuccessful: ensure entries are unique', 8000);
       });
   }
 
@@ -296,7 +297,7 @@ function Header() {
                       error={!isValidUsername() && signupAttempted}
                       helperText={!isValidUsername() && signupAttempted
                         ?
-                        "8 characters required"
+                        "must be a-z letters > 8"
                         : ""
                       }
                     />

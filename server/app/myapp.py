@@ -22,6 +22,11 @@ def create_app(test_config=None):
     # Override config for testing if provided
     if test_config:
         app.config.update(test_config)
+        if "SQLALCHEMY_DATABASE_URI" not in test_config:
+            app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+
+    if test_config:
+        app.config.update(test_config)
 
     # Initialize extensions
     db.init_app(app)
