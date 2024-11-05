@@ -35,6 +35,12 @@
   float: right;
 }
 
+.top-right-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
 @media screen and (max-width: 500px) {
   .header a {
     float: none;
