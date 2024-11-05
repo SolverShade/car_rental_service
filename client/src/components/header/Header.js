@@ -30,13 +30,23 @@ function Header() {
     const userFound = sessionStorage.getItem('userFound') === 'true';
 
     if (firstName === '' || lastName === '') {
-      setFirstName(sessionStorage.getItem('firstName') || '');
-      setLastName(sessionStorage.getItem('lastName') || '');
+      const storedFirstName = sessionStorage.getItem('firstName');
+      const storedLastName = sessionStorage.getItem('lastName');
+
+      if (storedFirstName != null) {
+        setFirstName(storedFirstName);
+      } else {
+        setFirstName('');
+      }
+
+      if (storedLastName != null) {
+        setLastName(storedLastName);
+      } else {
+        setLastName('');
+      }
     }
 
     setUserFound(userFound);
-    setFirstName(firstName);
-    setLastName(lastName);
   }, []);
 
   const handleLoginLink = (event) => {
