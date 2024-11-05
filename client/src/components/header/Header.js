@@ -8,20 +8,40 @@ import {
 } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import GavelIcon from '@mui/icons-material/Gavel';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
+import axios from 'axios';
+import 'react-notifications/lib/notifications.css';
 
 function Header() {
   const [openLogin, setLoginOpen] = useState(false);
   const [openSignup, setSignupOpen] = useState(false);
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [loginAttempted, setLoginAttempted] = useState(false);
   const [signupAttempted, setSignupAttempted] = useState(false);
+  const [userFound, setUserFound] = useState(false);
+  const [userType, setUserType] = useState(null);
+
+  useEffect(() => {
+    const userFound = sessionStorage.getItem('userFound') === 'true';
+    const firstName = sessionStorage.getItem('firstName') || '';
+    const lastName = sessionStorage.getItem('lastName') || '';
+
+
+    setFirstName(sessionStorage.getItem('firstName') || '');
+    setLastName(sessionStorage.getItem('lastName') || '');
+
+    setUserFound(userFound);
+    setFirstName(firstName);
+    setLastName(lastName);
+  }, []);
 
   const handleLoginLink = (event) => {
-    const loggedIn = sessionStorage.getItem('loggedIn');
+    const loggedIn = sessionStorage.getItem('userFound');
     if (!loggedIn) {
       setLoginOpen(true);
       event.preventDefault();
@@ -29,7 +49,7 @@ function Header() {
   };
 
   const handleSignupLink = (event) => {
-    const loggedIn = sessionStorage.getItem('loggedIn');
+    const loggedIn = sessionStorage.getItem('userFound');
     if (!loggedIn) {
       setSignupOpen(true);
       event.preventDefault();
@@ -44,34 +64,97 @@ function Header() {
     setSignupOpen(false);
   };
 
-  function searchForExistingAccount() {
-    //TODO: check for account in database
-  }
-
   function isValidEmail() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
-  function isValidUsername(username) {
-    //TODO: check for username in database
+  function isValidFirstName() {
+    const nameRegex = /^[A-Za-z]+$/;
+    return nameRegex.test(firstName) && firstName.length >= 2;
+  }
+
+  function isValidLastName() {
+    const nameRegex = /^[A-Za-z]+$/;
+    return nameRegex.test(lastName) && lastName.length >= 2;
+  }
+
+  function isValidUsername() {
+    return username.length >= 8;
   }
 
   function isValidPassword() {
-    return password.length >= 8;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  }
+
+  function isValidPhoneNumber() {
+    const phoneRegex = /^[\+]?[0-9]{0,3}\W?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
+    return phoneRegex.test(phoneNumber);
   }
 
   async function handleSignup() {
-    //TODO: Implement signup and create user
     setSignupAttempted(true);
+
+    if (!isValidEmail() || !isValidUsername() || !isValidPassword() || !isValidFirstName() || !isValidLastName() || userType == null) {
+      return;
+    }
+
+    console.log('Email:', email);
+    console.log('Username:', username);
+    console.log('Password:', password);
+    console.log('First Name:', firstName);
+    console.log('Last Name:', lastName);
+    console.log('User Type:', userType);
+    console.log('phone:', phoneNumber.replace(/\D/g, ''));
+
+    const signupData = {
+      email: email,
+      username: username,
+      phone_number: phoneNumber.replace(/\D/g, ''),
+      password: password,
+      first_name: firstName,
+      last_name: lastName,
+      isAdmin: userType
+    };
+
+    await axios.post('http://localhost:5000/create_staff', signupData)
+      .then(response => {
+        NotificationManager.success('Success', 'Signup successful', 1250);
+        setSignupOpen(false);
+      })
+      .catch(error => {
+        NotificationManager.error('Error', 'Signup unsuccessful', 1250);
+      });
   }
 
 
   async function handleLogin() {
-    //TODO: Implement login and get token
+    const loginData = {
+      username: username,
+      password: password,
+    };
 
-    setLoginAttempted(true);
-    //handleLoginClose();
+    await axios.post('http://localhost:5000/login', loginData)
+      .then(response => {
+        sessionStorage.setItem('isStaff', response.data.login_successful);
+        sessionStorage.setItem('userFound', true);
+        sessionStorage.setItem('firstName', response.data.first_name);
+        sessionStorage.setItem('lastName', response.data.last_name);
+
+        setFirstName(response.data.first_name);
+        setLastName(response.data.last_name);
+
+        setLoginAttempted(true);
+        setUserFound(true);
+        setLoginOpen(false);
+
+        NotificationManager.success('Success', 'login successful', 1250);
+      })
+      .catch(error => {
+        setLoginAttempted(true);
+        NotificationManager.error('Error', 'login unsuccessful', 1250);
+      });
   }
 
   return (
@@ -80,8 +163,18 @@ function Header() {
         <img src="/black_logo.png" alt="Icon" style={{ marginRight: '10px' }} />
         <a href="/" class="logo">Car Rental Service</a>
         <div class="header-right">
-          <a class="/" href="/">HOME</a>
-          <a className="/staff_portal" href="/" onClick={handleLoginLink}>STAFF/ADMIN PORTAL</a>
+          <a
+            class="/"
+            href="/"
+          >
+            HOME
+          </a>
+          <a
+            className="/staff_portal"
+            href="/staff_portal"
+            onClick={handleLoginLink}>
+            STAFF/ADMIN PORTAL
+          </a>
           <Dialog open={openLogin} onClose={handleLoginClose}>
             <DialogTitle>
               {"Staff/Admin Login"}
@@ -89,7 +182,6 @@ function Header() {
               <Button
                 style={{ marginLeft: "248px" }}
                 variant="contained"
-                className="top-right-button"
                 onClick={handleLoginClose}
                 color="error"
               >
@@ -101,27 +193,17 @@ function Header() {
               <Box display="flex" flexDirection="column" gap={3} mt={0}>
                 <TextField
                   label="Username"
-                  value={email}
+                  value={username}
                   onChange={(event) => setUsername(event.target.value)}
-                  slotProps={{
-                    error: !isValidUsername() && loginAttempted,
-                    helperText: !isValidUsername() && loginAttempted
-                      ? "Invalid Username"
-                      : ""
-                  }}
                 />
                 <TextField
                   label="Password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  slotProps={{
-                    error: !isValidPassword() && loginAttempted,
-                    helperText: !isValidPassword() && loginAttempted
-                      ?
-                      "Invalid Password"
-                      : "",
-                  }}
                 />
+                {!userFound && loginAttempted && (
+                  <h6 style={{ color: 'red', textAlign: 'center' }}>User not found</h6>
+                )}
                 <Button
                   onClick={handleLogin}
                   variant="contained"
@@ -173,12 +255,20 @@ function Header() {
                     <TextField
                       label="First Name"
                       fullWidth
+                      value={firstName}
+                      onChange={(event) => setFirstName(event.target.value.trim())}
+                      error={!isValidFirstName() && signupAttempted}
+                      helperText={!isValidFirstName() && signupAttempted ? "must be a-z letters > 2" : ""}
                     />
                   </Grid>
                   <Grid item xs={6}>
                     <TextField
                       label="Last Name"
                       fullWidth
+                      value={lastName}
+                      onChange={(event) => setLastName(event.target.value.trim())}
+                      error={!isValidLastName() && signupAttempted}
+                      helperText={!isValidLastName() && signupAttempted ? "must be a-z letters > 2" : ""}
                     />
                   </Grid>
                 </Grid>
@@ -186,38 +276,56 @@ function Header() {
                   label="Email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  slotProps={{
-                    error: !isValidEmail() && signupAttempted,
-                    helperText: !isValidEmail() && signupAttempted
-                      ?
-                      "Invalid Email"
-                      : "",
-                  }}
+                  error={!isValidEmail() && signupAttempted}
+                  helperText={!isValidEmail() && signupAttempted ? "Invalid Email: format sample@email.com" : ""}
+                />
+                <TextField
+                  label="Phone Number"
+                  value={phoneNumber}
+                  onChange={(event) => setPhoneNumber(event.target.value)}
+                  error={!isValidPhoneNumber() && signupAttempted}
+                  helperText={!isValidPhoneNumber() && signupAttempted ? "Enter valid phone number" : ""}
                 />
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <TextField
                       label="Username"
                       fullWidth
+                      value={username}
+                      onChange={(event) => setUsername(event.target.value)}
+                      error={!isValidUsername() && signupAttempted}
+                      helperText={!isValidUsername() && signupAttempted
+                        ?
+                        "8 characters required"
+                        : ""
+                      }
                     />
                   </Grid>
                   <Grid item xs={6}>
                     <TextField
                       label="Password"
                       fullWidth
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      error={!isValidPassword() && signupAttempted}
+                      helperText={!isValidPassword() && signupAttempted
+                        ?
+                        "requires 8 characters, 1 uppercase, 1 lowercase, 1 number"
+                        : ""
+                      }
                     />
                   </Grid>
                 </Grid>
                 <TextField
                   select
                   label="User Type"
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                //value={}
-                //onChange={handleChange}
+                  value={userType}
+                  onChange={(event) => setUserType(event.target.value)}
+                  error={userType == null && signupAttempted}
+                  helperText={!userType == null && signupAttempted ? "Must set user type" : ""}
                 >
-                  <MenuItem value={0}>Staff</MenuItem>
-                  <MenuItem value={1}>Admin</MenuItem>
+                  <MenuItem value={false}>Staff</MenuItem>
+                  <MenuItem value={true}>Admin</MenuItem>
                 </TextField>
                 <Button
                   onClick={handleSignup}
@@ -229,8 +337,14 @@ function Header() {
               </Box>
             </DialogContent>
           </Dialog>
-          <a className="/signup" href="/" onClick={handleSignupLink}>SIGN UP</a>
-          <a className="/login" href="/" onClick={handleLoginLink}>LOGIN</a>
+          {userFound ? (
+            <a> {"Staff Member: " + firstName + " "} {lastName} </a>
+          ) : (
+            <>
+              <a className="signup" href="/" onClick={handleSignupLink}>SIGN UP</a>
+              <a className="login" href="/" onClick={handleLoginLink}>LOGIN</a>
+            </>
+          )}
         </div>
       </div>
     </header >

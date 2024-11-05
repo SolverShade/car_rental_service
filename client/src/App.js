@@ -6,16 +6,21 @@ import Header from './components/header/Header';
 import CustomerManagement from './pages/CustomerManagementPage/CustomerManagementPage'
 import Rental from './pages/RentalPage/Rental'
 import ViewCars from './pages/ViewCarsPage/ViewCars'
+import StaffPortal from './pages/StaffPortalPage/StaffPortal'
+import { NotificationContainer, NotificationManager } from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
 
 export default function App() {
   return (
     <Router>
       <Header />
+      <NotificationContainer />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/rental" element={<Rental />} />
         <Route path="/view_cars" element={<ViewCars />} />
         <Route path="/customer_management" element={<CustomerManagement />} />
+        <Route path="/staff_portal" element={<StaffPortal />} />
       </Routes>
       <Footer />
     </Router>
