@@ -24,7 +24,7 @@ def add_car():
         )
         db.session.add(new_car)
         db.session.commit()
-        return jsonify({"message": "Car added successfully"}), 201
+        return jsonify({"message": "Car added successfully", "car_id": new_car.id}), 201
     except KeyError as e:
         return jsonify({"error": f"Missing field: {str(e)}"}), 400
     except Exception as e:
@@ -76,7 +76,7 @@ def change_car_cost(car_id):
         return jsonify({"error": "Invalid input"}), 400
 
     try:
-        car = Car.query.get(car_id)
+        car = db.session.get(Car, car_id)
         if not car:
             return jsonify({"error": "Car not found"}), 404
 
@@ -104,4 +104,16 @@ def change_car_rented_status(car_id):
         return jsonify({"message": "Car rented status updated successfully"}), 200
     except Exception as e:
         db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@car_bp.route("/get_car_cost/<int:car_id>", methods=["GET"])
+def get_car_cost(car_id):
+    try:
+        car = db.session.get(Car, car_id)
+        if not car:
+            return jsonify({"error": "Car not found"}), 404
+
+        return jsonify({"daily_cost": car.daily_cost}), 200
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
