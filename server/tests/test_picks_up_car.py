@@ -57,3 +57,19 @@ def test_create_reservation_invalid_date_format():
     with app.test_client() as client:
         response = client.post("/create_reservation", json=sample_data)
         assert response.status_code == 400
+
+
+def test_create_valid_bill():
+    valid_bill_data = {
+        "totalcost": 366.63,
+        "isPayed": False,
+        "inPerson": False,
+        "credit_card": 1234567890123456,
+        "card_name": "John Doe",
+        "card_expiration_data": "12/23",
+        "card_cvc": 123,
+    }
+
+    with app.test_client() as client:
+        response = client.post("/create_bill", json=valid_bill_data)
+        assert response.status_code == 201
