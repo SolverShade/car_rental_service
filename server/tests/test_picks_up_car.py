@@ -4,7 +4,7 @@ import sys
 sys.path.append("..")
 sys.path.append(".")
 
-from app.myapp import create_app
+from ..app import create_app
 
 app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:"})
 

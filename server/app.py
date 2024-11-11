@@ -1,14 +1,13 @@
 import sys
-
-sys.path.append("..")
-sys.path.append(".")
-
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .extensions import db, migrate, bcrypt
-from routes.reservation_routes import reservation_bp
-from routes.staff_routes import staff_bp
-from routes.car_routes import car_bp
+from .routes.reservation_routes import reservation_bp
+from .routes.staff_routes import staff_bp
+from .routes.car_routes import car_bp
+
+sys.path.append("..")
+sys.path.append(".")
 
 
 def create_app(test_config=None):

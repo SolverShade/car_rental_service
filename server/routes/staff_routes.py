@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.extensions import db
+from server.extensions import db
 from models.staff import Staff
 
 

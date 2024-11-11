@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from server.models.reservation import Reservation
-from app.extensions import db
+from server.extensions import db
 from datetime import datetime
 
 reservation_bp = Blueprint("reservation", __name__)
@@ -84,12 +84,15 @@ def create_reservation():
     try:
         db.session.add(new_reservation)
         db.session.commit()
-        return jsonify(
-            {
-                "message": "Reservation created successfully",
-                "reservation_id": new_reservation.id,
-            }
-        ), 201
+        return (
+            jsonify(
+                {
+                    "message": "Reservation created successfully",
+                    "reservation_id": new_reservation.id,
+                }
+            ),
+            201,
+        )
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500

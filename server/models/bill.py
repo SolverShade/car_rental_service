@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from app.extensions import db
+from server.extensions import db
 from sqlalchemy import Numeric
 
 
