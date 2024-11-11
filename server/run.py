@@ -3,9 +3,8 @@ import sys
 sys.path.append("..")
 sys.path.append(".")
 
+from server.app import create_app
 
-# run.py
-from app.myapp import create_app
 
 app = create_app()
 

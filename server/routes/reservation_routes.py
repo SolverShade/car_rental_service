@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from server.models.reservation import Reservation
-from app.extensions import db
+from server.models.bill import Bill
+from server.extensions import db
 from datetime import datetime
 
 reservation_bp = Blueprint("reservation", __name__)
@@ -84,12 +85,15 @@ def create_reservation():
     try:
         db.session.add(new_reservation)
         db.session.commit()
-        return jsonify(
-            {
-                "message": "Reservation created successfully",
-                "reservation_id": new_reservation.id,
-            }
-        ), 201
+        return (
+            jsonify(
+                {
+                    "message": "Reservation created successfully",
+                    "reservation_id": new_reservation.id,
+                }
+            ),
+            201,
+        )
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -112,3 +116,27 @@ def get_reservation(reservation_id):
     }
 
     return jsonify(reservation_data), 200
+
+
+@reservation_bp.route(
+    "/add_bill_id_to_reservation/<int:reservation_id>", methods=["POST"]
+)
+def add_bill_id_to_reservation(reservation_id):
+    reservation = Reservation.query.get(reservation_id)
+    if not reservation:
+        return jsonify({"error": "Reservation not found"}), 404
+
+    data = request.get_json()
+    bill_id = data.get("bill_id")
+
+    if not bill_id:
+        return jsonify({"error": "Missing bill ID"}), 400
+
+    bill = Bill.query.get(bill_id)
+    if not bill:
+        return jsonify({"error": "Bill not found"}), 404
+
+    reservation.bill_id = bill_id
+    db.session.commit()
+
+    return jsonify({"message": "Bill ID added to reservation successfully"}), 200

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from server.models.car import Car
-from app.extensions import db
+from server.extensions import db
 from datetime import datetime
 
 car_bp = Blueprint("car", __name__)

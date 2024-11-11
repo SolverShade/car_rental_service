@@ -5,6 +5,28 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { formatTime } from '../../utility/DateUtils'
 
+async function onFormFilled(bill_info) {
+  //Store bill
+  //TODO: calculate real cost values when cars a stored in db
+
+  const response = await axios.post(`http://localhost:5000/create_bill`,
+    {
+      totalcost: 366.63,
+      isPayed: false,
+      inPerson: false,
+      credit_card: bill_info.creditCardNumber,
+      card_name: bill_info.cardName,
+      card_expiration_data: "12/23",
+      card_cvc: 123,
+    });
+
+  const reservationId = sessionStorage.getItem('reservationId');
+  console.log(reservationId);
+
+  await axios.post(`http://localhost:5000/add_bill_id_to_reservation/${reservationId}`,
+    { bill_id: response.data.bill_id });
+}
+
 function ReservationForm() {
   return (
     <form className="form-container">
@@ -37,6 +59,11 @@ function PaymentForm() {
 
 function Rental() {
   const [reservation, setReservation] = useState(null);
+  const [bill, setBill] = useState(null);
+  const [creditCardNumber, setCreditCardNumber] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [cardExpirationDate, setCardExpirationDate] = useState('');
+  const [cardCVC, setCardCVC] = useState('');
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -115,11 +142,28 @@ function Rental() {
                 <label for="In-person">In-person</label>
               </div>
             </div>
-            <PaymentForm></PaymentForm>
+            <PaymentForm
+              creditCardNumber={creditCardNumber}
+              setCreditCardNumber={setCreditCardNumber}
+              cardName={cardName}
+              setCardName={setCardName}
+              cardExpirationDate={cardExpirationDate}
+              setCardExpirationDate={setCardExpirationDate}
+              cardCVC={cardCVC}
+              setCardCVC={setCardCVC}
+            />
             <Button
               variant="contained"
               style={{ backgroundColor: 'black', color: 'white' }}
               fullWidth
+              onClick={() => onFormFilled(
+                {
+                  creditCardNumber: creditCardNumber,
+                  cardName: cardName,
+                  cardExpirationDate: cardExpirationDate,
+                  cardCVC: cardCVC
+                }
+              )}
             >
               Reserve
             </Button>
