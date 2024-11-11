@@ -16,8 +16,8 @@ async function onFormFilled(bill_info) {
       inPerson: false,
       credit_card: bill_info.creditCardNumber,
       card_name: bill_info.cardName,
-      card_expiration_data: "12/23",
-      card_cvc: 123,
+      card_expiration_data: bill_info.cardExpirationDate,
+      card_cvc: bill_info.cardCVC
     });
 
   const reservationId = sessionStorage.getItem('reservationId');
@@ -142,16 +142,36 @@ function Rental() {
                 <label for="In-person">In-person</label>
               </div>
             </div>
-            <PaymentForm
-              creditCardNumber={creditCardNumber}
-              setCreditCardNumber={setCreditCardNumber}
-              cardName={cardName}
-              setCardName={setCardName}
-              cardExpirationDate={cardExpirationDate}
-              setCardExpirationDate={setCardExpirationDate}
-              cardCVC={cardCVC}
-              setCardCVC={setCardCVC}
-            />
+            <form className="form-container">
+              <label><b>Name on Card</b></label><br />
+              <input
+                type="text"
+                className="form-field"
+                value={cardName}
+                onChange={(e) => setCardName(e.target.value)}
+              /><br />
+              <label><b>Card Number</b></label><br />
+              <input
+                type="text"
+                className="form-field"
+                value={creditCardNumber}
+                onChange={(e) => setCreditCardNumber(e.target.value)}
+              /><br />
+              <label><b>Expiration Date</b></label><br />
+              <input
+                type="text"
+                className="form-field"
+                value={cardExpirationDate}
+                onChange={(e) => setCardExpirationDate(e.target.value)}
+              /><br />
+              <label><b>CVC</b></label><br />
+              <input
+                type="text"
+                className="form-field"
+                value={cardCVC}
+                onChange={(e) => setCardCVC(e.target.value)}
+              /><br />
+            </form>
             <Button
               variant="contained"
               style={{ backgroundColor: 'black', color: 'white' }}
