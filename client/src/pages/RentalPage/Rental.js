@@ -5,6 +5,28 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { formatTime } from '../../utility/DateUtils'
 
+async function onFormFilled(bill_info) {
+  //Store bill
+  //TODO: calculate real cost values when cars a stored in db
+
+  const response = await axios.post(`http://localhost:5000/create_bill`,
+    {
+      totalcost: 366.63,
+      isPayed: false,
+      inPerson: false,
+      credit_card: bill_info.creditCardNumber,
+      card_name: bill_info.cardName,
+      card_expiration_data: bill_info.cardExpirationDate,
+      card_cvc: bill_info.cardCVC
+    });
+
+  const reservationId = sessionStorage.getItem('reservationId');
+  console.log(reservationId);
+
+  await axios.post(`http://localhost:5000/add_bill_id_to_reservation/${reservationId}`,
+    { bill_id: response.data.bill_id });
+}
+
 function ReservationForm() {
   return (
     <form className="form-container">
@@ -37,6 +59,11 @@ function PaymentForm() {
 
 function Rental() {
   const [reservation, setReservation] = useState(null);
+  const [bill, setBill] = useState(null);
+  const [creditCardNumber, setCreditCardNumber] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [cardExpirationDate, setCardExpirationDate] = useState('');
+  const [cardCVC, setCardCVC] = useState('');
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -115,11 +142,48 @@ function Rental() {
                 <label for="In-person">In-person</label>
               </div>
             </div>
-            <PaymentForm></PaymentForm>
+            <form className="form-container">
+              <label><b>Name on Card</b></label><br />
+              <input
+                type="text"
+                className="form-field"
+                value={cardName}
+                onChange={(e) => setCardName(e.target.value)}
+              /><br />
+              <label><b>Card Number</b></label><br />
+              <input
+                type="text"
+                className="form-field"
+                value={creditCardNumber}
+                onChange={(e) => setCreditCardNumber(e.target.value)}
+              /><br />
+              <label><b>Expiration Date</b></label><br />
+              <input
+                type="text"
+                className="form-field"
+                value={cardExpirationDate}
+                onChange={(e) => setCardExpirationDate(e.target.value)}
+              /><br />
+              <label><b>CVC</b></label><br />
+              <input
+                type="text"
+                className="form-field"
+                value={cardCVC}
+                onChange={(e) => setCardCVC(e.target.value)}
+              /><br />
+            </form>
             <Button
               variant="contained"
               style={{ backgroundColor: 'black', color: 'white' }}
               fullWidth
+              onClick={() => onFormFilled(
+                {
+                  creditCardNumber: creditCardNumber,
+                  cardName: cardName,
+                  cardExpirationDate: cardExpirationDate,
+                  cardCVC: cardCVC
+                }
+              )}
             >
               Reserve
             </Button>

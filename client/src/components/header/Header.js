@@ -90,7 +90,7 @@ function Header() {
 
   function isValidUsername() {
     const regex = /^[A-Za-z]+$/;
-    return username.length >= 8 && regex.test(username);
+    return username.length >= 3 && regex.test(username);
   }
 
   function isValidPassword() {
@@ -307,7 +307,7 @@ function Header() {
                       error={!isValidUsername() && signupAttempted}
                       helperText={!isValidUsername() && signupAttempted
                         ?
-                        "must be a-z letters > 8"
+                        "must be a-z letters > 3"
                         : ""
                       }
                     />

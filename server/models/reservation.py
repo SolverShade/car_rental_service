@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from app.extensions import db
+from ..extensions import db
 
 
 class Reservation(db.Model):
