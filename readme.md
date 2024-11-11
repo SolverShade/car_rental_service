@@ -77,6 +77,7 @@ source venv/bin/activate
 
 # On Windows
 .\venv\Scripts\activate
+```
 
 - install all the libraries on your environment
 
