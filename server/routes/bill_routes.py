@@ -40,3 +40,38 @@ def create_bill():
         jsonify({"message": "Bill created successfully", "bill_id": new_bill.id}),
         201,
     )
+
+
+@bill_bp.route("/pay_bill", methods=["POST"])
+def pay_bill():
+    data = request.get_json()
+    bill_id = data.get("bill_id")
+
+    bill = Bill.query.get(bill_id)
+    if not bill:
+        return jsonify({"error": "Bill not found"}), 404
+
+    bill.isPayed = True
+    db.session.commit()
+
+    return jsonify({"message": "Bill paid successfully"}), 200
+
+
+@bill_bp.route("/get_bill/<int:bill_id>", methods=["GET"])
+def get_bill(bill_id):
+    bill = Bill.query.get(bill_id)
+    if not bill:
+        return jsonify({"error": "Bill not found"}), 404
+
+    bill_data = {
+        "id": bill.id,
+        "totalcost": bill.totalcost,
+        "isPayed": bill.isPayed,
+        "inPerson": bill.inPerson,
+        "credit_card": bill.credit_card,
+        "card_name": bill.card_name,
+        "card_expiration_data": bill.card_expiration_data,
+        "card_cvc": bill.card_cvc,
+    }
+
+    return jsonify(bill_data), 200
