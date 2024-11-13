@@ -72,7 +72,11 @@ python -m venv venv
 - source the environment
 
 ```bash
+# On Linux/macOS
 source venv/bin/activate
+
+# On Windows
+.\venv\Scripts\activate
 ```
 
 - install all the libraries on your environment
