@@ -6,6 +6,7 @@ from .routes.reservation_routes import reservation_bp
 from .routes.staff_routes import staff_bp
 from .routes.car_routes import car_bp
 from .routes.bill_routes import bill_bp
+from .routes.customer_routes import customer_bp
 
 sys.path.append("..")
 sys.path.append(".")
@@ -42,6 +43,7 @@ def create_app(test_config=None):
     app.register_blueprint(staff_bp)
     app.register_blueprint(car_bp)
     app.register_blueprint(bill_bp)
+    app.register_blueprint(customer_bp)
 
     # Create tables
     with app.app_context():
