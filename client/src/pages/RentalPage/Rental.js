@@ -5,7 +5,7 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { formatTime } from '../../utility/DateUtils'
 
-async function onFormFilled(bill_info) {
+async function onFormFilled(bill_info, customer_info) {
   //Store bill
   //TODO: calculate real cost values when cars a stored in db
 
@@ -25,37 +25,18 @@ async function onFormFilled(bill_info) {
 
   await axios.post(`http://localhost:5000/add_bill_id_to_reservation/${reservationId}`,
     { bill_id: response.data.bill_id });
+
+  // Stores customer information
+  await axios.post(`http://localhost:5000/create_customer`,
+    {
+      first_name: customer_info.custFirstName,
+      last_name: customer_info.custLastName,
+      email: customer_info.custEmail,
+      phone_number: customer_info.custPhoneNum,
+      reservation_id: reservationId
+    })
 }
 
-function ReservationForm() {
-  return (
-    <form className="form-container">
-      <label><b>Fist Name</b></label><br />
-      <input type="text" className="form-field" /><br />
-      <label><b>Last Name</b></label><br />
-      <input type="text" className="form-field" /><br />
-      <label><b>Email</b></label><br />
-      <input type="text" className="form-field" /><br />
-      <label><b>Phone Number</b></label><br />
-      <input type="text" className="form-field" /><br />
-    </form>
-  )
-}
-
-function PaymentForm() {
-  return (
-    <form className="form-container">
-      <label><b>Name on Card</b></label><br />
-      <input type="text" className="form-field" /><br />
-      <label><b>Card Number</b></label><br />
-      <input type="text" className="form-field" /><br />
-      <label><b>Expiration Date</b></label><br />
-      <input type="text" className="form-field" /><br />
-      <label><b>CVC</b></label><br />
-      <input type="text" className="form-field" /><br />
-    </form>
-  )
-}
 
 function Rental() {
   const [reservation, setReservation] = useState(null);
@@ -64,6 +45,10 @@ function Rental() {
   const [cardName, setCardName] = useState('');
   const [cardExpirationDate, setCardExpirationDate] = useState('');
   const [cardCVC, setCardCVC] = useState('');
+  const [custFirstName, setCustFirstName] = useState('');
+  const [custLastName, setCustLastName] = useState('');
+  const [custEmail, setCustEmail] = useState('');
+  const [custPhoneNum, setCustPhoneNum] = useState('');
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -128,7 +113,31 @@ function Rental() {
         <div className="customer-info-container container-style">
           <div className="cust-details-container">
             <h4>Customer Details</h4>
-            <ReservationForm></ReservationForm>
+            <form className="form-container">
+              <label><b>Fist Name</b></label><br />
+              <input 
+                type="text" className="form-field"
+                value={custFirstName} 
+                onChange={(e) => setCustFirstName(e.target.value)}/><br />
+              <label><b>Last Name</b></label><br />
+              <input 
+                type="text" 
+                className="form-field" 
+                value={custLastName} 
+                onChange={(e) => setCustLastName(e.target.value)}/><br />
+              <label><b>Email</b></label><br />
+              <input 
+                type="text" 
+                className="form-field" 
+                value={custEmail} 
+                onChange={(e) => setCustEmail(e.target.value)}/><br />
+              <label><b>Phone Number</b></label><br />
+              <input
+                type="text" 
+                className="form-field" 
+                value={custPhoneNum} 
+                onChange={(e) => setCustPhoneNum(e.target.value)}/><br />
+            </form>
           </div>
           <div className="payment-method-container">
             <h4>Select Payment Method</h4>
@@ -182,6 +191,12 @@ function Rental() {
                   cardName: cardName,
                   cardExpirationDate: cardExpirationDate,
                   cardCVC: cardCVC
+                },
+                {
+                  custFirstName: custFirstName,
+                  custLastName: custLastName,
+                  custEmail: custEmail,
+                  custPhoneNum: custPhoneNum
                 }
               )}
             >
