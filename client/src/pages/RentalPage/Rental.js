@@ -9,11 +9,11 @@ async function onFormFilled(bill_info, customer_info) {
   //Store bill
   //TODO: calculate real cost values when cars a stored in db
 
-  const response = await axios.post(`http://localhost:5000/create_bill`,
+  let response = await axios.post(`http://localhost:5000/create_bill`,
     {
-      totalcost: 366.63,
+      totalcost: bill_info.finalCost,
       isPayed: false,
-      inPerson: false,
+      inPerson: bill_info.inPerson,
       credit_card: bill_info.creditCardNumber,
       card_name: bill_info.cardName,
       card_expiration_data: bill_info.cardExpirationDate,
@@ -27,7 +27,7 @@ async function onFormFilled(bill_info, customer_info) {
     { bill_id: response.data.bill_id });
 
   // Stores customer information
-  await axios.post(`http://localhost:5000/create_customer`,
+  response = await axios.post(`http://localhost:5000/create_customer`,
     {
       first_name: customer_info.custFirstName,
       last_name: customer_info.custLastName,
@@ -35,11 +35,24 @@ async function onFormFilled(bill_info, customer_info) {
       phone_number: customer_info.custPhoneNum,
       reservation_id: reservationId
     })
+
+  const carId = sessionStorage.getItem('carId'); // Ensure 'carId' is stored in session storage
+  if (!carId) {
+    console.error('Car ID not found in session storage');
+    return;
+  }
+
+  await axios.post(`http://localhost:5000/add_customer_id_to_reservation/${reservationId}`,
+    { customer_id: response.data.id });
+
+  await axios.put(`http://localhost:5000/set_car_rented/${carId}`, { rented: true })
 }
 
 
 function Rental() {
   const [reservation, setReservation] = useState(null);
+  const [daysRented, setDaysRented] = useState(null);
+  const [car, setCar] = useState(null);
   const [bill, setBill] = useState(null);
   const [creditCardNumber, setCreditCardNumber] = useState('');
   const [cardName, setCardName] = useState('');
@@ -49,20 +62,49 @@ function Rental() {
   const [custLastName, setCustLastName] = useState('');
   const [custEmail, setCustEmail] = useState('');
   const [custPhoneNum, setCustPhoneNum] = useState('');
+  const [inPerson, setInPerson] = useState(false);
+  const [totalCost, setTotalCost] = useState(0);
+  const [taxAmount, setTaxAmount] = useState(0);
+  const [finalCost, setFinalCost] = useState(0);
 
   useEffect(() => {
-    const fetchReservation = async () => {
-      const reservationId = sessionStorage.getItem('reservationId');
-      const response = await axios.get(`http://localhost:5000/reservation/${reservationId}`);
-      setReservation(response.data);
+    const fetchReservationAndCar = async () => {
+      try {
+        const reservationId = sessionStorage.getItem('reservationId');
+        const reservationResponse = await axios.get(`http://localhost:5000/reservation/${reservationId}`);
+        setReservation(reservationResponse.data);
+
+        const carId = sessionStorage.getItem('carId');
+        const carResponse = await axios.get(`http://localhost:5000/get_car/${carId}`);
+        setCar(carResponse.data);
+
+        // Perform calculations after fetching data
+        const startDate = new Date(reservationResponse.data.start_date);
+        const endDate = new Date(reservationResponse.data.end_date);
+        const days = (endDate - startDate) / (1000 * 60 * 60 * 24);
+        setDaysRented(days);
+
+        const totalCost = carResponse.data.daily_cost * days;
+        const taxRate = 0.0475; // North Carolina state sales tax rate
+        const taxAmount = totalCost * taxRate;
+        const finalCost = totalCost + taxAmount;
+
+        setTotalCost(totalCost);
+        setTaxAmount(taxAmount);
+        setFinalCost(finalCost);
+      } catch (error) {
+        console.error('Error fetching reservation or car data:', error);
+      }
     };
 
-    fetchReservation();
+    fetchReservationAndCar();
   }, []);
 
-  if (!reservation) {
+
+  if (!reservation || !car) {
     return <div>Loading...</div>;
   }
+
 
   return (
     <div className="reservation-container">
@@ -100,12 +142,12 @@ function Rental() {
               Daily Unlimited
             </p>
             <div className="payment-summary-grid">
-              <text className="grid-item">Toyota Camry x 7 days</text>
-              <text className="grid-item">$350.00</text>
+              <text className="grid-item">{`${car.make} ${car.model} x ${daysRented} days`}</text>
+              <text className="grid-item">{`$${totalCost.toFixed(2)}`}</text>
               <text className="grid-item">Tax</text>
-              <text className="grid-item">$16.63</text>
-              <text className="grid-item"><b>Total Cost</b></text>
-              <text className="grid-item">$366.63</text>
+              <text className="grid-item">{`$${taxAmount.toFixed(2)}`}</text>
+              <text className="grid-item"><b>Final Cost:</b></text>
+              <text className="grid-item">{`$${finalCost.toFixed(2)}`}</text>
             </div>
           </div>
         </div>
@@ -114,41 +156,53 @@ function Rental() {
           <div className="cust-details-container">
             <h4>Customer Details</h4>
             <form className="form-container">
-              <label><b>Fist Name</b></label><br />
-              <input 
+              <label><b>First Name</b></label><br />
+              <input
                 type="text" className="form-field"
-                value={custFirstName} 
-                onChange={(e) => setCustFirstName(e.target.value)}/><br />
+                value={custFirstName}
+                onChange={(e) => setCustFirstName(e.target.value)} /><br />
               <label><b>Last Name</b></label><br />
-              <input 
-                type="text" 
-                className="form-field" 
-                value={custLastName} 
-                onChange={(e) => setCustLastName(e.target.value)}/><br />
+              <input
+                type="text"
+                className="form-field"
+                value={custLastName}
+                onChange={(e) => setCustLastName(e.target.value)} /><br />
               <label><b>Email</b></label><br />
-              <input 
-                type="text" 
-                className="form-field" 
-                value={custEmail} 
-                onChange={(e) => setCustEmail(e.target.value)}/><br />
+              <input
+                type="text"
+                className="form-field"
+                value={custEmail}
+                onChange={(e) => setCustEmail(e.target.value)} /><br />
               <label><b>Phone Number</b></label><br />
               <input
-                type="text" 
-                className="form-field" 
-                value={custPhoneNum} 
-                onChange={(e) => setCustPhoneNum(e.target.value)}/><br />
+                type="text"
+                className="form-field"
+                value={custPhoneNum}
+                onChange={(e) => setCustPhoneNum(e.target.value)} /><br />
             </form>
           </div>
           <div className="payment-method-container">
             <h4>Select Payment Method</h4>
             <div className="payment-choice">
               <div className="radio-button-container">
-                <input type="radio" id="credit" name="payment-type" value="Credit Card" /><br />
-                <label for="credit">Credit Card</label>
+                <input
+                  type="radio"
+                  id="credit"
+                  name="payment-type"
+                  value="Credit Card"
+                  onChange={() => setInPerson(false)}
+                /><br />
+                <label htmlFor="credit">Credit Card</label>
               </div>
               <div className="radio-button-container">
-                <input type="radio" id="In-person" name="payment-type" value="In-person" /><br />
-                <label for="In-person">In-person</label>
+                <input
+                  type="radio"
+                  id="In-person"
+                  name="payment-type"
+                  value="In-person"
+                  onChange={() => setInPerson(true)}
+                /><br />
+                <label htmlFor="In-person">In-person</label>
               </div>
             </div>
             <form className="form-container">
@@ -187,6 +241,8 @@ function Rental() {
               fullWidth
               onClick={() => onFormFilled(
                 {
+                  finalCost: finalCost,
+                  inPerson: inPerson,
                   creditCardNumber: creditCardNumber,
                   cardName: cardName,
                   cardExpirationDate: cardExpirationDate,

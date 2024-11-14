@@ -11,6 +11,7 @@ class Customer(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.String(20), unique=True, nullable=False)
     reservation_id = db.Column(db.Integer, nullable=True)
+    extend_existing = True
 
     def __init__(self, first_name, last_name, email, phone_number, reservation_id=None):
         self.first_name = first_name
