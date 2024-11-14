@@ -34,3 +34,33 @@ def create_customer():
     db.session.commit()
 
     return jsonify({"message": "Customer created successfully"}), 201 
+
+#@customer_bp.route("/customer_update/<int:reservation_id>", methods=["PATCH"])
+#def customer_update(reservation_id):
+#   customer = Customer.query.get(reservation_id)
+
+@customer_bp.route("/customers", methods=["GET"])
+def get_customers():
+    try:
+        # Query the database for all customers
+        customers = Customer.query.all()
+
+        customers_list = [
+            {
+                "first_name": customer.first_name,
+                "last_name": customer.last_name,
+                "email": customer.email,
+                "phone_number": customer.phone_number,
+                "reservation_id": customer.reservation_id,
+            }
+            for customer in customers
+        ]
+
+        return jsonify(customers_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+
+
+
