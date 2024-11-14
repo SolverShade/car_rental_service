@@ -60,7 +60,6 @@ def create_customer():
 @customer_bp.route("/customers", methods=["GET"])
 def get_customers():
     try:
-        # Query the database for all customers
         customers = Customer.query.all()
 
         customers_list = [
@@ -75,5 +74,26 @@ def get_customers():
         ]
 
         return jsonify(customers_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@customer_bp.route("/get_customer/<int:id>", methods=["GET"])
+def get_customer_by_id(id):
+    try:
+        customer = Customer.query.get(id)
+
+        if not customer:
+            return jsonify({"error": "Customer not found"}), 404
+
+        customer_data = {
+            "first_name": customer.first_name,
+            "last_name": customer.last_name,
+            "email": customer.email,
+            "phone_number": customer.phone_number,
+            "reservation_id": customer.reservation_id,
+        }
+
+        return jsonify(customer_data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -3,51 +3,45 @@ import './Rental.css';
 import Button from '@mui/material/Button';
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
-import { formatTime } from '../../utility/DateUtils'
+import { formatTime } from '../../utility/DateUtils';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 
 async function onFormFilled(bill_info, customer_info) {
-  //Store bill
-  //TODO: calculate real cost values when cars a stored in db
-
-  let response = await axios.post(`http://localhost:5000/create_bill`,
-    {
-      totalcost: bill_info.finalCost,
-      isPayed: false,
-      inPerson: bill_info.inPerson,
-      credit_card: bill_info.creditCardNumber,
-      card_name: bill_info.cardName,
-      card_expiration_data: bill_info.cardExpirationDate,
-      card_cvc: bill_info.cardCVC
-    });
+  let response = await axios.post(`http://localhost:5000/create_bill`, {
+    totalcost: bill_info.finalCost,
+    isPayed: false,
+    inPerson: bill_info.inPerson,
+    credit_card: bill_info.creditCardNumber,
+    card_name: bill_info.cardName,
+    card_expiration_data: bill_info.cardExpirationDate,
+    card_cvc: bill_info.cardCVC
+  });
 
   const reservationId = sessionStorage.getItem('reservationId');
   console.log(reservationId);
 
-  await axios.post(`http://localhost:5000/add_bill_id_to_reservation/${reservationId}`,
-    { bill_id: response.data.bill_id });
+  await axios.post(`http://localhost:5000/add_bill_id_to_reservation/${reservationId}`, { bill_id: response.data.bill_id });
 
-  // Stores customer information
-  response = await axios.post(`http://localhost:5000/create_customer`,
-    {
-      first_name: customer_info.custFirstName,
-      last_name: customer_info.custLastName,
-      email: customer_info.custEmail,
-      phone_number: customer_info.custPhoneNum,
-      reservation_id: reservationId
-    })
+  response = await axios.post(`http://localhost:5000/create_customer`, {
+    first_name: customer_info.custFirstName,
+    last_name: customer_info.custLastName,
+    email: customer_info.custEmail,
+    phone_number: customer_info.custPhoneNum,
+    reservation_id: reservationId
+  });
 
-  const carId = sessionStorage.getItem('carId'); // Ensure 'carId' is stored in session storage
+  const carId = sessionStorage.getItem('carId');
   if (!carId) {
     console.error('Car ID not found in session storage');
     return;
   }
 
-  await axios.post(`http://localhost:5000/add_customer_id_to_reservation/${reservationId}`,
-    { customer_id: response.data.id });
+  await axios.post(`http://localhost:5000/add_customer_id_to_reservation/${reservationId}`, { customer_id: response.data.id });
+  await axios.put(`http://localhost:5000/set_car_rented/${carId}`, { rented: true });
 
-  await axios.put(`http://localhost:5000/set_car_rented/${carId}`, { rented: true })
+  NotificationManager.success('Success', 'Reservation Complete', 2000);
+  window.location.href = '/';
 }
-
 
 function Rental() {
   const [reservation, setReservation] = useState(null);
@@ -66,6 +60,18 @@ function Rental() {
   const [totalCost, setTotalCost] = useState(0);
   const [taxAmount, setTaxAmount] = useState(0);
   const [finalCost, setFinalCost] = useState(0);
+
+  // Error states
+  const [errors, setErrors] = useState({
+    creditCardNumber: '',
+    cardName: '',
+    cardExpirationDate: '',
+    cardCVC: '',
+    custFirstName: '',
+    custLastName: '',
+    custEmail: '',
+    custPhoneNum: ''
+  });
 
   useEffect(() => {
     const fetchReservationAndCar = async () => {
@@ -100,11 +106,89 @@ function Rental() {
     fetchReservationAndCar();
   }, []);
 
+  const validateInputs = () => {
+    const newErrors = {};
+
+    if (inPerson == false) {
+      if (!creditCardNumber) {
+        newErrors.creditCardNumber = 'Credit card number is required';
+      } else if (!/^\d{16}$/.test(creditCardNumber)) {
+        newErrors.creditCardNumber = 'Credit card number must be 16 digits';
+      }
+
+      if (!cardName) {
+        newErrors.cardName = 'Card name is required';
+      } else if (!/^[a-zA-Z\s]+$/.test(cardName)) {
+        newErrors.cardName = 'Card name must contain only letters and spaces';
+      }
+
+      if (!cardExpirationDate) {
+        newErrors.cardExpirationDate = 'Card expiration date is required';
+      } else if (!/^(0[1-9]|1[0-2])\/?([0-9]{4}|[0-9]{2})$/.test(cardExpirationDate)) {
+        newErrors.cardExpirationDate = 'Card expiration date must be in MM/YY format';
+      }
+
+      if (!cardCVC) {
+        newErrors.cardCVC = 'Card CVC is required';
+      } else if (!/^\d{3,4}$/.test(cardCVC)) {
+        newErrors.cardCVC = 'Card CVC must be 3 or 4 digits';
+      }
+    }
+
+    if (!custFirstName) {
+      newErrors.custFirstName = 'First name is required';
+    } else if (!/^[a-zA-Z]+$/.test(custFirstName)) {
+      newErrors.custFirstName = 'First name must contain only letters';
+    }
+
+    if (!custLastName) {
+      newErrors.custLastName = 'Last name is required';
+    } else if (!/^[a-zA-Z]+$/.test(custLastName)) {
+      newErrors.custLastName = 'Last name must contain only letters';
+    }
+
+    if (!custEmail) {
+      newErrors.custEmail = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(custEmail)) {
+      newErrors.custEmail = 'Email must be a valid email address';
+    }
+
+    if (!custPhoneNum) {
+      newErrors.custPhoneNum = 'Phone number is required';
+    } else if (!/^\d{10}$/.test(custPhoneNum)) {
+      newErrors.custPhoneNum = 'Phone number must be 10 digits';
+    }
+
+    setErrors(newErrors);
+    console.log(Object.keys(newErrors).length);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleReserve = () => {
+    if (validateInputs()) {
+      console.log('here');
+      onFormFilled(
+        {
+          finalCost: finalCost,
+          inPerson: inPerson,
+          creditCardNumber: creditCardNumber,
+          cardName: cardName,
+          cardExpirationDate: cardExpirationDate,
+          cardCVC: cardCVC
+        },
+        {
+          custFirstName: custFirstName,
+          custLastName: custLastName,
+          custEmail: custEmail,
+          custPhoneNum: custPhoneNum
+        }
+      );
+    }
+  };
 
   if (!reservation || !car) {
     return <div>Loading...</div>;
   }
-
 
   return (
     <div className="reservation-container">
@@ -160,104 +244,117 @@ function Rental() {
               <input
                 type="text" className="form-field"
                 value={custFirstName}
-                onChange={(e) => setCustFirstName(e.target.value)} /><br />
+                onChange={(e) => setCustFirstName(e.target.value)}
+              /><br />
+              {errors.custFirstName && <span className="error">{errors.custFirstName}</span>}
+              <br />
+
               <label><b>Last Name</b></label><br />
               <input
                 type="text"
                 className="form-field"
                 value={custLastName}
-                onChange={(e) => setCustLastName(e.target.value)} /><br />
+                onChange={(e) => setCustLastName(e.target.value)}
+              /><br />
+              {errors.custLastName && <span className="error">{errors.custLastName}</span>}
+              <br />
+
               <label><b>Email</b></label><br />
               <input
                 type="text"
                 className="form-field"
                 value={custEmail}
-                onChange={(e) => setCustEmail(e.target.value)} /><br />
+                onChange={(e) => setCustEmail(e.target.value)}
+              /><br />
+              {errors.custEmail && <span className="error">{errors.custEmail}</span>}
+              <br />
+
               <label><b>Phone Number</b></label><br />
               <input
                 type="text"
                 className="form-field"
                 value={custPhoneNum}
-                onChange={(e) => setCustPhoneNum(e.target.value)} /><br />
+                onChange={(e) => setCustPhoneNum(e.target.value)}
+              /><br />
+              {errors.custPhoneNum && <span className="error">{errors.custPhoneNum}</span>}
+              <br />
             </form>
-          </div>
-          <div className="payment-method-container">
-            <h4>Select Payment Method</h4>
-            <div className="payment-choice">
-              <div className="radio-button-container">
-                <input
-                  type="radio"
-                  id="credit"
-                  name="payment-type"
-                  value="Credit Card"
-                  onChange={() => setInPerson(false)}
-                /><br />
-                <label htmlFor="credit">Credit Card</label>
+
+            <div className="payment-method-container">
+              <h4>Select Payment Method</h4>
+              <div className="payment-choice">
+                <div className="radio-button-container">
+                  <input
+                    type="radio"
+                    id="credit"
+                    name="payment-type"
+                    value="Credit Card"
+                    onChange={() => setInPerson(false)}
+                  /><br />
+                  <label htmlFor="credit">Credit Card</label>
+                </div>
+                <div className="radio-button-container">
+                  <input
+                    type="radio"
+                    id="In-person"
+                    name="payment-type"
+                    value="In-person"
+                    onChange={() => setInPerson(true)}
+                  /><br />
+                  <label htmlFor="In-person">In-person</label>
+                </div>
               </div>
-              <div className="radio-button-container">
+              <form className="form-container">
+                <label><b>Name on Card</b></label><br />
                 <input
-                  type="radio"
-                  id="In-person"
-                  name="payment-type"
-                  value="In-person"
-                  onChange={() => setInPerson(true)}
+                  type="text"
+                  className="form-field"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value)}
                 /><br />
-                <label htmlFor="In-person">In-person</label>
-              </div>
+                {errors.cardName && <span className="error">{errors.cardName}</span>}
+                <br />
+
+                <label><b>Card Number</b></label><br />
+                <input
+                  type="text"
+                  className="form-field"
+                  value={creditCardNumber}
+                  onChange={(e) => setCreditCardNumber(e.target.value)}
+                /><br />
+                {errors.creditCardNumber && <span className="error">{errors.creditCardNumber}</span>}
+                <br />
+
+                <label><b>Expiration Date</b></label><br />
+                <input
+                  type="text"
+                  className="form-field"
+                  value={cardExpirationDate}
+                  onChange={(e) => setCardExpirationDate(e.target.value)}
+                /><br />
+                {errors.cardExpirationDate && <span className="error">{errors.cardExpirationDate}</span>}
+                <br />
+
+                <label><b>CVC</b></label><br />
+                <input
+                  type="text"
+                  className="form-field"
+                  value={cardCVC}
+                  onChange={(e) => setCardCVC(e.target.value)}
+                /><br />
+                {errors.cardCVC && <span className="error">{errors.cardCVC}</span>}
+                <br />
+              </form>
+              <Button
+                className='mt-4'
+                variant="contained"
+                style={{ backgroundColor: 'black', color: 'white' }}
+                fullWidth
+                onClick={handleReserve}
+              >
+                Reserve
+              </Button>
             </div>
-            <form className="form-container">
-              <label><b>Name on Card</b></label><br />
-              <input
-                type="text"
-                className="form-field"
-                value={cardName}
-                onChange={(e) => setCardName(e.target.value)}
-              /><br />
-              <label><b>Card Number</b></label><br />
-              <input
-                type="text"
-                className="form-field"
-                value={creditCardNumber}
-                onChange={(e) => setCreditCardNumber(e.target.value)}
-              /><br />
-              <label><b>Expiration Date</b></label><br />
-              <input
-                type="text"
-                className="form-field"
-                value={cardExpirationDate}
-                onChange={(e) => setCardExpirationDate(e.target.value)}
-              /><br />
-              <label><b>CVC</b></label><br />
-              <input
-                type="text"
-                className="form-field"
-                value={cardCVC}
-                onChange={(e) => setCardCVC(e.target.value)}
-              /><br />
-            </form>
-            <Button
-              variant="contained"
-              style={{ backgroundColor: 'black', color: 'white' }}
-              fullWidth
-              onClick={() => onFormFilled(
-                {
-                  finalCost: finalCost,
-                  inPerson: inPerson,
-                  creditCardNumber: creditCardNumber,
-                  cardName: cardName,
-                  cardExpirationDate: cardExpirationDate,
-                  cardCVC: cardCVC
-                },
-                {
-                  custFirstName: custFirstName,
-                  custLastName: custLastName,
-                  custEmail: custEmail,
-                  custPhoneNum: custPhoneNum
-                }
-              )}
-            >
-              Reserve
-            </Button>
           </div>
         </div>
       </div>
