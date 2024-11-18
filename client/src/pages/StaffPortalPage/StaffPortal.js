@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import PeopleIcon from '@mui/icons-material/People';
 import BusinessIcon from '@mui/icons-material/Business';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import EventIcon from '@mui/icons-material/Event'; // New icon import
 
 const StaffPortal = () => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px', height: '100vh' }}>
@@ -50,6 +51,20 @@ const StaffPortal = () => (
         </CardContent>
         <CardActions style={{ justifyContent: 'center' }}>
           <Button size="small" component={Link} to="/manage_cars">Go to Manage Cars</Button>
+        </CardActions>
+      </Card>
+      <Card style={{ flex: 1, margin: '10px', display: 'flex', flexDirection: 'column' }}>
+        <CardContent style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <EventIcon style={{ fontSize: 100, marginBottom: '20px' }} />
+          <Typography variant="h5" component="div">
+            Reservation Management
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Manage your reservations here.
+          </Typography>
+        </CardContent>
+        <CardActions style={{ justifyContent: 'center' }}>
+          <Button size="small" component={Link} to="/reservation_management">Go to Reservation Management</Button>
         </CardActions>
       </Card>
     </div>

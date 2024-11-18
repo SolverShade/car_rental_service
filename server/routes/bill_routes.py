@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from server.models.bill import Bill
+from ..models.bill import Bill
 from server.extensions import db
 
 bill_bp = Blueprint("bill", __name__)

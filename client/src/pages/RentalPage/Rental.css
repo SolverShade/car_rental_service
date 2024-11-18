@@ -1,62 +1,68 @@
 .reservation-container {
-    max-width: 1200px;
-    width: 90%;
-    margin: auto;
+  max-width: 1200px;
+  width: 90%;
+  margin: auto;
 }
 
 h2 {
-    margin-bottom: 20px;
-    margin-top: 20px;
+  margin-bottom: 20px;
+  margin-top: 20px;
 }
+
 .details-container {
-    display: flex;
-    gap: 40px;
-    height: fit-content;
+  display: flex;
+  gap: 40px;
+  height: fit-content;
 }
 
 .container-style {
-    background-color: white;
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    padding: 20px;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  padding: 20px;
 }
 
 .reservation-details-container {
-    flex: 1;
-    margin-bottom: 40px;
-    width: 450px;
+  flex: 1;
+  margin-bottom: 40px;
+  width: 450px;
 }
 
 .payment-summary-container {
-    width: 450px;
+  width: 450px;
 }
 
 .payment-summary-grid {
-    display: grid;
-    grid-template-columns: auto max-content;
+  display: grid;
+  grid-template-columns: auto max-content;
 }
 
 .customer-info-container {
-    height: fit-content;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
+  height: fit-content;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
 .form-field {
-    width: stretch;
-    height: 35px;
-    margin-bottom: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    border-radius: 5px;
+  width: stretch;
+  height: 35px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
 }
 
 .payment-choice {
-    display: flex;
-    gap: 40px;
+  display: flex;
+  gap: 40px;
 }
 
 .radio-button-container {
-    display: flex;
-    gap: 1px;
+  display: flex;
+  gap: 1px;
+}
+
+
+.error {
+  color: red;
 }
