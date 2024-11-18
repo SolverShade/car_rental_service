@@ -7,19 +7,31 @@ import axios from 'axios';
 
 function ViewCars() {
   const [carData, setCarData] = useState([]);
+  const [carMake, setCarMake] = useState('');
+  const [carModel, setCarModel] = useState('');
+  const [carYear, setCarYear] = useState('');
 
   useEffect(() => {
     async function getAvailableCars() {
       try {
         const response = await axios.get('http://localhost:5000/list_cars');
-        setCarData(response.data);
+        const cars = filterCarSelection(response.data);
+        setCarData(cars);
       } catch (error) {
         console.error('There was an error making the request:', error);
       }
     }
 
     getAvailableCars();
-  }, []);
+  }, [carMake, carModel, carYear]);
+
+  function filterCarSelection(cars) {
+    return cars.filter(car =>
+      (carMake.length === 0 || car.make.toLowerCase().includes(carMake.toLowerCase())) &&
+      (carModel.length === 0 || car.model.toLowerCase().includes(carModel.toLowerCase())) &&
+      (carYear.length === 0 || car.year.toString().includes(carYear))
+    );
+  }
 
   async function saveCarToReservation(carId) {
     const reservationId = sessionStorage.getItem('reservationId');
@@ -45,19 +57,14 @@ function ViewCars() {
     <div className="d-flex flex-column align-items-center">
       <div className="w-75 mt-4 border border-5 p-3">
         <h1 className="mb-4 text-center">Find your car</h1>
-        <div className="d-flex flex-row  justify-content-center gap-5">
-          <Grid item xs={6}>
-            <TextField
-              label="Car Name"
-              inputVariant="outlined"
-              fullWidth
-            />
-          </Grid>
+        <div className="d-flex flex-row justify-content-center gap-5">
           <Grid item xs={6}>
             <TextField
               label="Car Make"
               inputVariant="outlined"
               fullWidth
+              value={carMake}
+              onChange={(e) => setCarMake(e.target.value)}
             />
           </Grid>
           <Grid item xs={6}>
@@ -65,15 +72,19 @@ function ViewCars() {
               label="Car Model"
               inputVariant="outlined"
               fullWidth
+              value={carModel}
+              onChange={(e) => setCarModel(e.target.value)}
             />
           </Grid>
         </div>
-        <div className="d-flex flex-row  justify-content-center gap-5 mt-5">
+        <div className="d-flex flex-row justify-content-center gap-5 mt-5">
           <Grid item xs={6}>
             <TextField
               label="Year"
               inputVariant="outlined"
               fullWidth
+              value={carYear}
+              onChange={(e) => setCarYear(e.target.value)}
             />
           </Grid>
         </div>
@@ -81,8 +92,8 @@ function ViewCars() {
       <div className="mt-5">
         <div className="row">
           {carData.map((car, index) => (
-            <div className="col-md-4 mb-4" key={index}>
-              <div className="card">
+            <div className="col-md-6 mb-4" key={index}>
+              <div className="card" style={{ width: '500px', height: '500px' }}>
                 <img src={car.image_url} className="card-img-top p-2" alt={car.name} style={{ height: '300px' }} />
                 <div className="card-body">
                   <h5 className="card-title">{car.name}</h5>
