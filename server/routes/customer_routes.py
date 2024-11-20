@@ -52,11 +52,6 @@ def create_customer():
     )
 
 
-# @customer_bp.route("/customer_update/<int:reservation_id>", methods=["PATCH"])
-# def customer_update(reservation_id):
-#   customer = Customer.query.get(reservation_id)
-
-
 @customer_bp.route("/customers", methods=["GET"])
 def get_customers():
     try:
@@ -64,6 +59,7 @@ def get_customers():
 
         customers_list = [
             {
+                "id": customer.id,
                 "first_name": customer.first_name,
                 "last_name": customer.last_name,
                 "email": customer.email,
@@ -95,5 +91,83 @@ def get_customer_by_id(id):
         }
 
         return jsonify(customer_data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@customer_bp.route("/delete_customer/<int:id>", methods=["DELETE"])
+def delete_customer(id):
+    try:
+        customer = Customer.query.get(id)
+        if not customer:
+            return jsonify({"error": "Customer not found"}), 404
+
+        db.session.delete(customer)
+        db.session.commit()
+        return jsonify({"message": "Customer deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@customer_bp.route("/update_customer_phone/<int:id>", methods=["PUT"])
+def update_customer_phone(id):
+    try:
+        data = request.get_json()
+        new_phone_number = data.get("phone_number")
+        customer = Customer.query.get(id)
+        if not customer:
+            return jsonify({"error": "Customer not found"}), 404
+
+        customer.phone_number = new_phone_number
+        db.session.commit()
+        return jsonify({"message": "Phone number updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@customer_bp.route("/update_customer_email/<int:id>", methods=["PUT"])
+def update_customer_email(id):
+    try:
+        data = request.get_json()
+        new_email = data.get("email")
+        customer = Customer.query.get(id)
+        if not customer:
+            return jsonify({"error": "Customer not found"}), 404
+
+        customer.email = new_email
+        db.session.commit()
+        return jsonify({"message": "Email updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@customer_bp.route("/update_customer_first_name/<int:id>", methods=["PUT"])
+def update_customer_first_name(id):
+    try:
+        data = request.get_json()
+        new_first_name = data.get("first_name")
+        customer = Customer.query.get(id)
+        if not customer:
+            return jsonify({"error": "Customer not found"}), 404
+
+        customer.first_name = new_first_name
+        db.session.commit()
+        return jsonify({"message": "First name updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@customer_bp.route("/update_customer_last_name/<int:id>", methods=["PUT"])
+def update_customer_last_name(id):
+    try:
+        data = request.get_json()
+        new_last_name = data.get("last_name")
+        customer = Customer.query.get(id)
+        if not customer:
+            return jsonify({"error": "Customer not found"}), 404
+
+        customer.last_name = new_last_name
+        db.session.commit()
+        return jsonify({"message": "Last name updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
