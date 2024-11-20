@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from server.models.car import Car
+from ..models.car import Car
 from server.extensions import db
 from datetime import datetime
 
@@ -115,5 +115,25 @@ def get_car_cost(car_id):
             return jsonify({"error": "Car not found"}), 404
 
         return jsonify({"daily_cost": car.daily_cost}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@car_bp.route("/get_car/<int:car_id>", methods=["GET"])
+def get_car(car_id):
+    try:
+        car = db.session.get(Car, car_id)
+        if not car:
+            return jsonify({"error": "Car not found"}), 404
+
+        car_details = {
+            "id": car.id,
+            "make": car.make,
+            "model": car.model,
+            "year": car.year,
+            "daily_cost": car.daily_cost,
+        }
+
+        return jsonify(car_details), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
