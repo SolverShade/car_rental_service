@@ -25,6 +25,7 @@ function Header() {
   const [signupAttempted, setSignupAttempted] = useState(false);
   const [userFound, setUserFound] = useState(false);
   const [userType, setUserType] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const userFound = sessionStorage.getItem('userFound') === 'true';
@@ -47,6 +48,7 @@ function Header() {
     }
 
     setUserFound(userFound);
+    setIsLoggedIn(userFound);
   }, []);
 
   const handleLoginLink = (event) => {
@@ -71,6 +73,15 @@ function Header() {
 
   const handleSignupClose = () => {
     setSignupOpen(false);
+  };
+
+  const handleSignout = () => {
+    sessionStorage.clear();
+    setIsLoggedIn(false);
+    setUserFound(false);
+    setFirstName('');
+    setLastName('');
+    NotificationManager.success('Success', 'Signout successful', 1250);
   };
 
   function isValidEmail() {
@@ -139,7 +150,6 @@ function Header() {
       });
   }
 
-
   async function handleLogin() {
     const loginData = {
       username: username,
@@ -158,6 +168,7 @@ function Header() {
 
         setLoginAttempted(true);
         setUserFound(true);
+        setIsLoggedIn(true);
         setLoginOpen(false);
 
         NotificationManager.success('Success', 'login successful', 1250);
@@ -349,7 +360,10 @@ function Header() {
             </DialogContent>
           </Dialog>
           {userFound ? (
-            <a> {"Staff Member: " + firstName + " "} {lastName} </a>
+            <>
+              <a> {"Staff Member: " + firstName + " "} {lastName} </a>
+              <a className="signout" href="/" onClick={handleSignout}>SIGN OUT</a>
+            </>
           ) : (
             <>
               <a className="signup" href="/" onClick={handleSignupLink}>SIGN UP</a>

@@ -1,8 +1,14 @@
-from flask import Blueprint, request, jsonify
-from server.models.reservation import Reservation
-from server.models.bill import Bill
-from server.extensions import db
 from datetime import datetime
+
+from flask import Blueprint, jsonify, request
+from sqlalchemy import not_
+
+from server.extensions import db
+
+from ..models.bill import Bill
+from ..models.car import Car
+from ..models.customer import Customer
+from ..models.reservation import Reservation
 
 reservation_bp = Blueprint("reservation", __name__)
 
@@ -140,3 +146,87 @@ def add_bill_id_to_reservation(reservation_id):
     db.session.commit()
 
     return jsonify({"message": "Bill ID added to reservation successfully"}), 200
+
+
+@reservation_bp.route(
+    "/add_car_id_to_reservation/<int:reservation_id>", methods=["POST"]
+)
+def add_car_id_to_reservation(reservation_id):
+    reservation = Reservation.query.get(reservation_id)
+    if not reservation:
+        return jsonify({"error": "Reservation not found"}), 404
+
+    data = request.get_json()
+    car_id = data.get("car_id")
+
+    if not car_id:
+        return jsonify({"error": "Missing car ID"}), 400
+
+    car = Car.query.get(car_id)
+    if not car:
+        return jsonify({"error": "Car not found"}), 404
+
+    reservation.car_id = car_id
+    db.session.commit()
+
+    return jsonify({"message": "Car ID added to reservation successfully"}), 200
+
+
+@reservation_bp.route(
+    "/add_customer_id_to_reservation/<int:reservation_id>", methods=["POST"]
+)
+def add_customer_id_to_reservation(reservation_id):
+    reservation = Reservation.query.get(reservation_id)
+    if not reservation:
+        return jsonify({"error": "Reservation not found"}), 404
+
+    data = request.get_json()
+    customer_id = data.get("customer_id")
+
+    if not customer_id:
+        return jsonify({"error": "Missing customer ID"}), 400
+
+    customer = Customer.query.get(customer_id)
+    if not customer:
+        return jsonify({"error": "Customer not found"}), 404
+
+    reservation.customer_id = customer_id
+    db.session.commit()
+
+    return jsonify({"message": "Customer ID added to reservation successfully"}), 200
+
+
+@reservation_bp.route("/reservations_with_ids", methods=["GET"])
+def get_reservations_with_ids():
+    try:
+        reservations = Reservation.query.all()
+
+        filtered_reservations = [
+            reservation
+            for reservation in reservations
+            if (
+                reservation.customer_id is not None
+                and reservation.bill_id is not None
+                and reservation.car_id is not None
+            )
+        ]
+
+        reservations_list = [
+            {
+                "id": reservation.id,
+                "start_date": reservation.start_date.strftime("%Y-%m-%d"),
+                "end_date": reservation.end_date.strftime("%Y-%m-%d"),
+                "start_time": reservation.start_time.strftime("%H:%M:%S"),
+                "end_time": reservation.end_time.strftime("%H:%M:%S"),
+                "pickup_location": reservation.pickup_location,
+                "dropoff_location": reservation.dropoff_location,
+                "customer_id": reservation.customer_id,
+                "bill_id": reservation.bill_id,
+                "car_id": reservation.car_id,
+            }
+            for reservation in filtered_reservations
+        ]
+
+        return jsonify(reservations_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

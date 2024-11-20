@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from server.extensions import db
-from models.staff import Staff
+from ..models.staff import Staff
 
 
 staff_bp = Blueprint("staff", __name__)
