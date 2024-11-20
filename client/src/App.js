@@ -8,6 +8,7 @@ import Rental from './pages/RentalPage/Rental'
 import ViewCars from './pages/ViewCarsPage/ViewCars'
 import CarManagement from './pages/CarManagePage/CarManagement'
 import StaffPortal from './pages/StaffPortalPage/StaffPortal'
+import ReservationManagement from './pages/ReservationManagement/ReservationManagement'
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/customer_management" element={<CustomerManagement />} />
         <Route path="/staff_portal" element={<StaffPortal />} />
         <Route path="/manage_cars" element={<CarManagement />} />
+        <Route path="/reservation_management" element={<ReservationManagement />} />
       </Routes>
       <Footer />
     </Router>
