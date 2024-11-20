@@ -43,6 +43,7 @@ function ViewCars() {
         sessionStorage.setItem('carId', carId);
         console.log('Response:', response.data);
         console.log('Car ID:', carId);
+        NavigateToReservationPage();
       })
       .catch(error => {
         console.error('Error:', error);
@@ -50,7 +51,7 @@ function ViewCars() {
   }
 
   function NavigateToReservationPage() {
-    window.open('/rental');
+    window.location.href = '/rental';
   }
 
   return (
@@ -106,7 +107,6 @@ function ViewCars() {
                     <br />
                     <Button onClick={() => {
                       saveCarToReservation(car.id);
-                      NavigateToReservationPage();
                     }}
                       className="btn btn-primary mt-3"
                       variant="contained"
