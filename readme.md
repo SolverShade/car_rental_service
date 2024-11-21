@@ -76,7 +76,7 @@ python -m venv venv
 source venv/bin/activate
 
 # On Windows
-.\venv\Scripts\activate
+venv/Scripts/activate
 ```
 
 - install all the libraries on your environment
