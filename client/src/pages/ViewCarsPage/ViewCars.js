@@ -23,7 +23,7 @@ function ViewCars() {
     }
 
     getAvailableCars();
-  }, [carMake, carModel, carYear]);
+  }, [carData, carMake, carModel, carYear]);
 
   function filterCarSelection(cars) {
     return cars.filter(car =>
@@ -35,6 +35,7 @@ function ViewCars() {
 
   async function saveCarToReservation(carId) {
     const reservationId = sessionStorage.getItem('reservationId');
+    console.log(reservationId);
 
     axios.post(`http://localhost:5000/add_car_id_to_reservation/${reservationId}`, {
       car_id: carId
@@ -105,8 +106,13 @@ function ViewCars() {
                     <br />
                     <strong>Year:</strong> {car.year}
                     <br />
-                    <Button onClick={() => {
-                      saveCarToReservation(car.id);
+                    <Button onClick={async () => {
+                      try {
+                        console.log(car.id);
+                        await saveCarToReservation(car.id);
+                      } catch (error) {
+                        console.error("Failed to save car to reservation:", error);
+                      }
                     }}
                       className="btn btn-primary mt-3"
                       variant="contained"
